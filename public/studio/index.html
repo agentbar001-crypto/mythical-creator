@@ -1,0 +1,3839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="artifact-type" content="tool">
+  <meta name="design-style" content="charter">
+  <title>The Mythical Creator • Legacy Builder</title>
+  <meta name="description" content="The Mythical Creator turns the real stories of the people you love into myth, song lyrics, lead sheets, and a printable legacy book. Private by design: your stories stay on your device.">
+  <meta name="robots" content="noindex">
+
+  <!-- Google Fonts: Libre Caslon Text, Inter, JetBrains Mono -->
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons (Pinned Allowed CDN) -->
+  <script src="https://unpkg.com/lucide@1.43.0/dist/umd/lucide.min.js"></script>
+
+  <style>
+    :root {
+      color-scheme: light;
+
+      /* Page and surfaces - Charter Style */
+      --background: #f7f4ec;               /* warm cream paper */
+      --surface-container-low: #fffdf8;    /* bright leaf: figure cards, panels */
+      --surface-container: #ece5d4;        /* deeper cream: secondary buttons, table headers */
+      --surface-container-high: #e3dac4;   /* table header band, hover fill */
+
+      /* Ink */
+      --on-surface: #1c1f26;               /* near-black ink */
+      --on-surface-variant: #4f5360;       /* graphite: captions, secondary text */
+
+      /* Rules */
+      --outline: #b08d57;                  /* brass: rules and borders; text only on navy */
+      --outline-variant: #d9cfb8;          /* pale brass: hairline dividers */
+
+      /* Accents */
+      --primary: #14213d;                  /* deep navy: title band, primary action */
+      --on-primary: #f7f4ec;               /* cream on navy */
+      --primary-container: #e3e6ee;        /* pale navy wash */
+      --on-primary-container: #14213d;
+      --secondary: #2d5a4a;                /* bottle green: favorable notes, second voice */
+      --tertiary: #8a6a35;                 /* dark brass: small accent text on cream */
+      --error: #9b2c2c;
+      --on-error: #f7f4ec;
+
+      /* Semantic */
+      --positive: #2d5a4a;
+      --warning: #c27803;
+      --focus: #14213d;
+
+      /* Data series */
+      --data-1: #14213d;                   /* navy */
+      --data-2: #8a6a35;                   /* dark brass */
+      --data-3: #2d5a4a;                   /* bottle green */
+      --data-4: #5b7aa0;                   /* slate blue */
+      --data-context: #c2bba9;
+
+      /* Fonts */
+      --font-headline: 'Libre Caslon Text', Georgia, serif;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-label: 'JetBrains Mono', monospace;
+
+      /* Shape */
+      --rounded: 0.125rem;
+      --rounded-lg: 0.25rem;
+      --rounded-full: 0.125rem;
+
+      /* Style effects */
+      --brass-rule: 2px solid var(--outline);
+      --hairline: 1px solid var(--outline-variant);
+      --leaf-underline: 0 1px 0 var(--outline-variant);
+
+      /* Type scale for Focused Tool */
+      --display-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.25rem);
+      --headline-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem);
+      --subhead-size: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+      --body-size: clamp(0.9375rem, 0.9rem + 0.15vw, 1rem);
+      --label-size: 0.75rem;
+
+      /* Spacing scale */
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 1rem;
+      --space-lg: 1.5rem;
+      --space-xl: 2.5rem;
+      --space-2xl: 4rem;
+      --space-3xl: 6rem;
+
+      /* Motion */
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+      --dur-micro: 120ms;
+      --dur-short: 220ms;
+      --dur-long: 420ms;
+    }
+
+    /* Base reset */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { overflow-x: clip; margin: 0; padding: 0; }
+    header { position: static !important; }
+
+    body {
+      background-color: var(--background);
+      color: var(--on-surface);
+      font-family: var(--font-body);
+      font-size: var(--body-size);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Page container */
+    .page-grid {
+      display: grid;
+      gap: var(--space-lg);
+      padding: var(--space-md) var(--space-lg) var(--space-2xl);
+      max-width: 1320px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .page-grid * { min-width: 0; }
+
+    /* Charter Title Band */
+    .title-band {
+      background: var(--primary);
+      color: var(--on-primary);
+      padding: var(--space-xl) var(--space-lg) var(--space-lg);
+      border-bottom: 3px solid var(--outline);
+    }
+    .title-band-inner {
+      max-width: 1320px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+    .title-band h1 {
+      font-family: var(--font-headline);
+      font-size: var(--display-size);
+      font-weight: 400;
+      color: var(--on-primary);
+      margin: 0;
+      letter-spacing: -0.01em;
+      line-height: 1.15;
+    }
+    .title-band .kicker {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: color-mix(in srgb, var(--outline) 85%, var(--on-primary));
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    .title-band .lede {
+      font-family: var(--font-body);
+      font-size: var(--subhead-size);
+      color: color-mix(in srgb, var(--on-primary) 80%, var(--primary));
+      margin: 0;
+      max-width: 85ch;
+    }
+
+    /* Navigation Bar */
+    .nav-strip {
+      background: var(--surface-container);
+      border-bottom: var(--hairline);
+      padding: var(--space-xs) var(--space-lg);
+    }
+    .nav-inner {
+      max-width: 1320px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+    }
+    .nav-tabs {
+      display: flex;
+      gap: var(--space-xs);
+      overflow-x: auto;
+      padding: var(--space-xs) 0;
+    }
+    .nav-tab {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--on-surface-variant);
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: var(--space-sm) var(--space-md);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      border-radius: var(--rounded);
+      transition: background-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+      white-space: nowrap;
+    }
+    .nav-tab:hover {
+      background: var(--surface-container-high);
+      color: var(--on-surface);
+    }
+    .nav-tab.active {
+      background: var(--surface-container-low);
+      color: var(--primary);
+      border: 1px solid var(--outline-variant);
+      border-bottom: 2px solid var(--outline);
+    }
+
+    /* Cards and Panels */
+    .figure-card {
+      background: var(--surface-container-low);
+      border-top: var(--brass-rule);
+      box-shadow: var(--leaf-underline);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-md) var(--space-lg);
+      border-left: var(--hairline);
+      border-right: var(--hairline);
+      border-bottom: var(--hairline);
+    }
+
+    .figure-value {
+      font-family: var(--font-headline);
+      font-weight: 400;
+      font-size: 2rem;
+      font-variant-numeric: tabular-nums lining-nums;
+      color: var(--on-surface);
+      line-height: 1.1;
+    }
+    .figure-label {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--on-surface-variant);
+      margin-bottom: var(--space-xs);
+    }
+    .figure-delta {
+      color: var(--tertiary);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      margin-top: var(--space-xs);
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    /* Section Headings */
+    .section-head {
+      border-top: var(--brass-rule);
+      padding-top: var(--space-md);
+      border-bottom: var(--hairline);
+      padding-bottom: var(--space-sm);
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+    }
+    .section-head h2 {
+      font-family: var(--font-headline);
+      font-size: var(--headline-size);
+      font-weight: 400;
+      color: var(--on-surface);
+      margin: 0;
+      line-height: 1.2;
+    }
+    .section-head p {
+      font-size: 0.875rem;
+      color: var(--on-surface-variant);
+      margin: 0.25rem 0 0;
+    }
+
+    /* Buttons */
+    .btn {
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 0.875rem;
+      letter-spacing: 0.02em;
+      padding: 0.5rem 1rem;
+      border-radius: var(--rounded);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: background-color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+      min-height: 40px;
+    }
+    .btn:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 2px;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: var(--on-primary);
+      border: 1px solid var(--primary);
+    }
+    .btn-primary:hover {
+      background: color-mix(in srgb, var(--primary) 85%, black);
+    }
+    .btn-secondary {
+      background: transparent;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+    }
+    .btn-secondary:hover {
+      background: var(--primary-container);
+    }
+    .btn-outline {
+      background: var(--surface-container-low);
+      color: var(--on-surface);
+      border: 1px solid var(--outline-variant);
+    }
+    .btn-outline:hover {
+      background: var(--surface-container);
+      border-color: var(--outline);
+    }
+    .btn-brass {
+      background: var(--surface-container-low);
+      color: var(--tertiary);
+      border: 1px solid var(--outline);
+    }
+    .btn-brass:hover {
+      background: var(--surface-container);
+      color: var(--on-surface);
+    }
+    .btn-sm {
+      padding: 0.25rem 0.625rem;
+      font-size: 0.8125rem;
+      min-height: 32px;
+    }
+
+    /* Tags */
+    .stamp-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      border: 1px solid var(--outline);
+      background: transparent;
+      color: var(--tertiary);
+      font-family: var(--font-label);
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: var(--rounded);
+      cursor: pointer;
+      transition: all var(--dur-micro) var(--ease-out);
+      user-select: none;
+    }
+    .stamp-tag:hover {
+      background: var(--surface-container);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .stamp-tag.selected {
+      background: var(--primary);
+      color: var(--on-primary);
+      border-color: var(--primary);
+    }
+    .stamp-tag.wound {
+      border-color: color-mix(in srgb, var(--error) 60%, var(--outline));
+      color: var(--error);
+    }
+    .stamp-tag.wound.selected {
+      background: var(--error);
+      color: var(--on-error);
+      border-color: var(--error);
+    }
+    .stamp-tag.gift {
+      border-color: color-mix(in srgb, var(--secondary) 60%, var(--outline));
+      color: var(--secondary);
+    }
+    .stamp-tag.gift.selected {
+      background: var(--secondary);
+      color: var(--on-primary);
+      border-color: var(--secondary);
+    }
+
+    /* Form Inputs */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      margin-bottom: var(--space-md);
+    }
+    .form-label {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--on-surface-variant);
+    }
+    .form-input, .form-textarea, .form-select {
+      background: var(--surface-container-low);
+      border: 1px solid var(--outline-variant);
+      border-radius: var(--rounded);
+      color: var(--on-surface);
+      font-family: var(--font-body);
+      font-size: 0.9375rem;
+      padding: 0.6rem 0.75rem;
+      transition: border-color var(--dur-micro) var(--ease-out);
+      width: 100%;
+    }
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+      outline: 2px solid var(--focus);
+      outline-offset: 1px;
+      border-color: var(--primary);
+    }
+    .form-textarea {
+      min-height: 96px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    /* Grid Layouts */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-md);
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-md);
+    }
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--space-md);
+    }
+    .grid-sidebar {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      gap: var(--space-lg);
+    }
+
+    /* Emotional Arc Engine Visualizer */
+    .arc-chip {
+      background: var(--surface-container-low);
+      border: 1px solid var(--outline-variant);
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--rounded);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      font-family: var(--font-label);
+      font-size: 0.8125rem;
+      transition: all var(--dur-micro) var(--ease-out);
+    }
+    .arc-chip:hover {
+      border-color: var(--outline);
+      background: var(--surface-container);
+    }
+    .arc-chip.active {
+      border: 2px solid var(--outline);
+      background: var(--surface-container-low);
+      box-shadow: 0 2px 6px rgba(20, 33, 61, 0.08);
+    }
+    .arc-sequence-box {
+      background: var(--surface-container-low);
+      border: 1px dashed var(--outline);
+      padding: var(--space-md);
+      border-radius: var(--rounded);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      flex-wrap: wrap;
+      min-height: 56px;
+    }
+    .arc-step-pill {
+      background: var(--primary);
+      color: var(--on-primary);
+      font-family: var(--font-label);
+      font-size: 0.75rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: var(--rounded);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    /* Engraved Sheet Music Container */
+    .sheet-music-wrapper {
+      background: #fffdfa;
+      border: 2px solid var(--outline-variant);
+      box-shadow: 0 4px 12px rgba(20, 33, 61, 0.05);
+      border-radius: var(--rounded);
+      padding: var(--space-xl) var(--space-lg);
+      position: relative;
+    }
+    .sheet-music-header {
+      text-align: center;
+      border-bottom: 1px solid var(--outline-variant);
+      padding-bottom: var(--space-md);
+      margin-bottom: var(--space-lg);
+    }
+    .sheet-music-title {
+      font-family: var(--font-headline);
+      font-size: 1.625rem;
+      margin: 0;
+      color: var(--on-surface);
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .sheet-music-subtitle {
+      font-family: var(--font-body);
+      font-size: 0.9375rem;
+      font-style: italic;
+      color: var(--on-surface-variant);
+      margin: 0.25rem 0 0;
+    }
+    .sheet-music-meta {
+      display: flex;
+      justify-content: space-between;
+      margin-top: var(--space-sm);
+      font-family: var(--font-label);
+      font-size: 0.8125rem;
+      color: var(--tertiary);
+    }
+
+    /* Audio Player Strip */
+    .audio-player-strip {
+      background: var(--primary);
+      color: var(--on-primary);
+      padding: var(--space-md) var(--space-lg);
+      border-radius: var(--rounded);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: var(--space-md);
+      margin-bottom: var(--space-md);
+      border-bottom: 2px solid var(--outline);
+    }
+    .audio-controls {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    .audio-progress {
+      flex: 1;
+      min-width: 200px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    /* Modal Sheet Overlay */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 33, 61, 0.6);
+      backdrop-filter: blur(2px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: var(--space-md);
+    }
+    .modal-overlay.open {
+      display: flex;
+    }
+    .modal-dialog {
+      background: var(--background);
+      border: 2px solid var(--outline);
+      box-shadow: 0 8px 30px rgba(20, 33, 61, 0.25);
+      border-radius: var(--rounded);
+      max-width: 840px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: var(--space-xl);
+    }
+
+    /* Print styles */
+    @media print {
+      body {
+        background: white !important;
+        color: black !important;
+      }
+      .title-band, .nav-strip, .audio-player-strip, .hide-print {
+        display: none !important;
+      }
+      .sheet-music-wrapper {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+      }
+      .page-grid {
+        padding: 0 !important;
+        max-width: 100% !important;
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .grid-sidebar { grid-template-columns: 1fr; }
+      .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 640px) {
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .page-grid { padding: var(--space-sm); }
+      .title-band { padding: var(--space-lg) var(--space-sm); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    /* Empty states, toast, footer (added for user-owned content) */
+    .empty-state { text-align:center; padding:var(--space-xl) var(--space-lg); border:1px dashed var(--outline); border-radius:var(--rounded); background:var(--surface-container-low); display:flex; flex-direction:column; align-items:center; gap:var(--space-sm); }
+    .empty-state h3 { font-family:var(--font-headline); font-size:1.5rem; color:var(--primary); margin:0; }
+    .empty-state p { max-width:560px; color:var(--on-surface-variant); margin:0 0 var(--space-sm); }
+    .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--primary); color:var(--on-primary); padding:0.65rem 1rem; border-radius:var(--rounded); z-index:2000; opacity:0; transition:opacity 0.2s; pointer-events:none; font-size:0.875rem; max-width:calc(100vw - 32px); box-shadow:0 6px 20px rgba(0,0,0,0.18); }
+    .toast.show { opacity:1; }
+    .app-footer { max-width:1280px; margin:0 auto; padding:var(--space-lg) 16px var(--space-xl); font-family:var(--font-label); font-size:0.75rem; color:var(--on-surface-variant); display:flex; flex-direction:column; gap:0.25rem; text-align:center; }
+    .arc-chip:focus-visible, [data-action]:focus-visible { outline:2px solid var(--outline); outline-offset:2px; }
+
+  </style>
+</head>
+<body>
+
+  <!-- CHARTER TITLE BAND -->
+  <header class="title-band">
+    <div class="title-band-inner">
+      <div class="kicker">
+        <i data-lucide="compass" style="width:16px; height:16px;"></i>
+        <span>Legacy Builder™ v2.0 • Architecture by Billy Adono Robles</span>
+        <span style="opacity:0.6;">|</span>
+        <span>Nobody Gets Forgotten</span>
+      </div>
+      <h1>The Mythical Creator Engine</h1>
+      <p class="lede">
+        Turn the real stories of the people you love into myth, song, and a permanent record. Add your own characters, capture their memories, and build wounds and gifts, emotional arcs, lead sheets, song prompts, and a printable legacy book around them.
+      </p>
+    </div>
+  </header>
+
+  <!-- NAVIGATION BAR -->
+  <nav class="nav-strip" aria-label="Main Application Views">
+    <div class="nav-inner">
+      <div class="nav-tabs" role="tablist">
+        <button class="nav-tab active" id="tab-intake" role="tab" aria-selected="true" onclick="switchMainTab('intake')">
+          <i data-lucide="book-open" style="width:14px; height:14px;"></i>
+          <span>1. Story Intake & Myth Extractor</span>
+        </button>
+        <button class="nav-tab" id="tab-sheet" role="tab" aria-selected="false" onclick="switchMainTab('sheet')">
+          <i data-lucide="music" style="width:14px; height:14px;"></i>
+          <span>2. Interactive Lead Sheet</span>
+        </button>
+        <button class="nav-tab" id="tab-suno" role="tab" aria-selected="false" onclick="switchMainTab('suno')">
+          <i data-lucide="sparkles" style="width:14px; height:14px;"></i>
+          <span>3. Suno & Lyrical Pipeline</span>
+        </button>
+        <button class="nav-tab" id="tab-vault" role="tab" aria-selected="false" onclick="switchMainTab('vault')">
+          <i data-lucide="archive" style="width:14px; height:14px;"></i>
+          <span>4. Legacy Vault</span>
+        </button>
+        <button class="nav-tab" id="tab-graph" role="tab" aria-selected="false" onclick="switchMainTab('graph')">
+          <i data-lucide="git-fork" style="width:14px; height:14px;"></i>
+          <span>5. Relational Graph</span>
+        </button>
+        <button class="nav-tab" id="tab-book" role="tab" aria-selected="false" onclick="switchMainTab('book')">
+          <i data-lucide="printer" style="width:14px; height:14px;"></i>
+          <span>6. Book Engine</span>
+        </button>
+        <button class="nav-tab" id="tab-byok" role="tab" aria-selected="false" onclick="switchMainTab('byok')">
+          <i data-lucide="cpu" style="width:14px; height:14px;"></i>
+          <span>7. AI Settings</span>
+        </button>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:0.5rem;" class="hide-print">
+        <span class="stamp-tag" id="engine-status-badge" style="background:var(--surface-container-high); border-color:var(--outline);">
+          <i data-lucide="check-circle" style="width:12px; height:12px; color:var(--secondary);"></i>
+          <span id="engine-status-text">Engine Ready • Offline Mode</span>
+        </span>
+        <button class="btn btn-brass btn-sm" onclick="openCustomCategoryModal()" title="Add custom Wounds, Gifts, Symbols, Archetypes, Roles">
+          <i data-lucide="plus" style="width:12px; height:12px;"></i>
+          <span>+ Custom Lexicon</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN APPLICATION CONTENT -->
+  <main class="page-grid">
+
+    <!-- METRICS & STATUS STRIP -->
+    <div class="grid-4 hide-print">
+      <div class="figure-card">
+        <div class="figure-label">Vault Register</div>
+        <div class="figure-value" id="stat-people-count">0</div>
+        <div class="figure-delta">
+          <i data-lucide="user-check" style="width:13px; height:13px;"></i>
+          <span>Characters Preserved</span>
+        </div>
+      </div>
+      <div class="figure-card">
+        <div class="figure-label">Captured Stories</div>
+        <div class="figure-value" id="stat-story-count">0</div>
+        <div class="figure-delta">
+          <i data-lucide="feather" style="width:13px; height:13px;"></i>
+          <span>Memories Written Down</span>
+        </div>
+      </div>
+      <div class="figure-card">
+        <div class="figure-label">Active Emotional Vector</div>
+        <div class="figure-value" id="stat-active-arc" style="font-size:1.4rem;">—</div>
+        <div class="figure-delta" style="color:var(--secondary);">
+          <i data-lucide="activity" style="width:13px; height:13px;"></i>
+          <span id="stat-vector-values">No arc yet</span>
+        </div>
+      </div>
+      <div class="figure-card">
+        <div class="figure-label">Songs in Progress</div>
+        <div class="figure-value" id="stat-sheet-count">0</div>
+        <div class="figure-delta">
+          <i data-lucide="music-2" style="width:13px; height:13px;"></i>
+          <span>Lead Sheets & Lyrics</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 1: STORY INTAKE & MYTH EXTRACTION ENGINE (Levels 1 - 6)              -->
+    <!-- ========================================================================= -->
+    <section id="view-intake" class="app-view">
+      <div class="section-head">
+        <div>
+          <h2>Level 1 to 6 • Memory Intake & Myth Extraction</h2>
+          <p>Everything starts with a person. Enter a raw memory, extract the Wounds and Gifts inside it, anchor sensory Symbols, and sequence the Emotional Arc.</p>
+        </div>
+        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;" class="hide-print">
+          <button class="btn btn-primary btn-sm" onclick="openPersonModal()">
+            <i data-lucide="user-plus" style="width:13px; height:13px;"></i>
+            <span>New Character</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="empty-state" data-empty>
+        <i data-lucide="feather" style="width:32px; height:32px; color:var(--tertiary);"></i>
+        <h3>Create your first character</h3>
+        <p>Start with one real person whose story deserves to last: a parent, a grandparent, a neighbor, a friend, or yourself. Everything in this app is built from the characters you add.</p>
+        <div style="display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="openPersonModal()">
+            <i data-lucide="user-plus" style="width:14px; height:14px;"></i>
+            <span>Create your first character</span>
+          </button>
+          <button class="btn btn-outline" onclick="triggerImport()">
+            <i data-lucide="upload" style="width:14px; height:14px;"></i>
+            <span>Import a saved vault</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="grid-sidebar" data-needs-person>
+        <!-- Left: Person Record Dossier -->
+        <div class="figure-card" style="display:flex; flex-direction:column; gap:var(--space-md);">
+          <div class="form-group">
+            <label class="form-label" for="intake-person-select">Active Character</label>
+            <select class="form-select" id="intake-person-select" onchange="selectPerson(this.value)"></select>
+          </div>
+
+          <div style="background:var(--surface-container); padding:var(--space-md); border-radius:var(--rounded); border-left:3px solid var(--outline);">
+            <div style="display:flex; justify-content:space-between; align-items:baseline; gap:0.5rem;">
+              <span style="font-family:var(--font-headline); font-size:1.15rem; font-weight:700; overflow-wrap:anywhere;" id="person-card-name"></span>
+              <span class="stamp-tag" id="person-card-role"></span>
+            </div>
+            <div style="font-family:var(--font-label); font-size:0.75rem; color:var(--on-surface-variant); margin-top:0.25rem;" id="person-card-loc"></div>
+            <p style="font-size:0.875rem; margin:0.5rem 0 0; color:var(--on-surface);" id="person-card-summary"></p>
+            <div style="margin-top:0.75rem; display:flex; justify-content:space-between; font-size:0.8125rem; border-top:1px solid var(--outline-variant); padding-top:0.5rem; gap:0.5rem; flex-wrap:wrap;">
+              <span style="color:var(--on-surface-variant);" title="How complete this character's record is">Legacy Score: <strong style="color:var(--primary);" id="person-card-score">0/100</strong></span>
+              <span style="color:var(--on-surface-variant);">Connections: <strong id="person-card-links">0</strong></span>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+            <button class="btn btn-outline btn-sm" style="flex:1;" onclick="openPersonModal(appState.activePersonId)">
+              <i data-lucide="pencil" style="width:13px; height:13px;"></i>
+              <span>Edit</span>
+            </button>
+            <button class="btn btn-brass btn-sm" style="flex:1;" onclick="saveActiveToVault()">
+              <i data-lucide="save" style="width:13px; height:13px;"></i>
+              <span>Save to Vault</span>
+            </button>
+            <button class="btn btn-outline btn-sm" onclick="deleteActivePerson()" title="Delete this character">
+              <i data-lucide="trash-2" style="width:13px; height:13px;"></i>
+            </button>
+          </div>
+
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" for="intake-archetype-select">Archetype (Level 4)</label>
+            <select class="form-select" id="intake-archetype-select" onchange="onArchetypeChanged(this.value)"></select>
+          </div>
+
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" for="intake-voice-select">Telling Voice (Level 5)</label>
+            <select class="form-select" id="intake-voice-select" onchange="onVoiceChanged(this.value)"></select>
+          </div>
+        </div>
+
+        <!-- Right: Story Intake & Myth Extraction -->
+        <div style="display:flex; flex-direction:column; gap:var(--space-md);">
+          <div class="figure-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-sm); gap:0.5rem;">
+              <label class="form-label" style="margin-bottom:0;" for="raw-memory-input">Raw Memory Capture (Level 2: Story Engine)</label>
+              <span style="font-family:var(--font-label); font-size:0.75rem; color:var(--on-surface-variant); white-space:nowrap;" id="word-count-badge">0 words</span>
+            </div>
+            <textarea class="form-textarea" id="raw-memory-input" style="min-height:140px;" placeholder="Write the memory the way you'd tell it out loud. Who was there, where it happened, what you saw, smelled, and heard, what it cost them, and what it gave everyone else. Saves automatically."></textarea>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:var(--space-sm); flex-wrap:wrap; gap:0.5rem;">
+              <div style="font-size:0.8125rem; color:var(--on-surface-variant);" id="memory-save-status">Saved on this device</div>
+              <button class="btn btn-primary" id="btn-extract" onclick="runOneClickStoryIntake()">
+                <i data-lucide="zap" style="width:14px; height:14px;"></i>
+                <span>One-Click Story Intake / Extract</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="figure-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:var(--hairline); padding-bottom:var(--space-xs); margin-bottom:var(--space-sm); gap:0.5rem; flex-wrap:wrap;">
+              <span class="form-label" style="margin-bottom:0;">Level 3 • Myth Extraction: Wounds, Gifts & Sensory Symbols</span>
+              <button class="btn btn-brass btn-sm" onclick="openCustomCategoryModal()">+ Add Custom Tag</button>
+            </div>
+            <p style="font-size:0.8125rem; color:var(--on-surface-variant); margin:0 0 var(--space-sm);">Tap a tag to add or remove it for this character.</p>
+
+            <div style="margin-bottom:var(--space-md);">
+              <div style="font-size:0.8125rem; font-weight:600; color:var(--error); margin-bottom:0.35rem; display:flex; align-items:center; gap:0.35rem;">
+                <i data-lucide="shield-alert" style="width:13px; height:13px;"></i>
+                <span>Wounds (Where the Worldview Cracked):</span>
+              </div>
+              <div style="display:flex; flex-wrap:wrap; gap:0.35rem;" id="wounds-container"></div>
+            </div>
+
+            <div style="margin-bottom:var(--space-md);">
+              <div style="font-size:0.8125rem; font-weight:600; color:var(--secondary); margin-bottom:0.35rem; display:flex; align-items:center; gap:0.35rem;">
+                <i data-lucide="gift" style="width:13px; height:13px;"></i>
+                <span>Gifts (Strength Born From Suffering):</span>
+              </div>
+              <div style="display:flex; flex-wrap:wrap; gap:0.35rem;" id="gifts-container"></div>
+            </div>
+
+            <div>
+              <div style="font-size:0.8125rem; font-weight:600; color:var(--tertiary); margin-bottom:0.35rem; display:flex; align-items:center; gap:0.35rem;">
+                <i data-lucide="anchor" style="width:13px; height:13px;"></i>
+                <span>Sensory Symbols (Physical Anchors of the Story):</span>
+              </div>
+              <div style="display:flex; flex-wrap:wrap; gap:0.35rem;" id="symbols-container"></div>
+            </div>
+          </div>
+
+          <div class="figure-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-sm); gap:0.5rem;">
+              <div>
+                <span class="form-label" style="margin-bottom:0;">Level 6 • Emotional Arc Sequencer (Vector Model)</span>
+                <p style="font-size:0.8125rem; color:var(--on-surface-variant); margin:0;">Click lanes to sequence up to four steps. The arc shapes the lead sheet, the song style, and the lyrics.</p>
+              </div>
+              <button class="btn btn-outline btn-sm" onclick="clearArcSequence()">Reset Arc</button>
+            </div>
+
+            <div class="arc-sequence-box" id="arc-sequence-display"></div>
+
+            <div class="grid-3" style="margin-top:var(--space-md);">
+              <div class="arc-chip" role="button" tabindex="0" onclick="addArcStep('Rise')">
+                <div>
+                  <strong style="color:var(--primary);">1. RISE</strong>
+                  <div style="font-size:0.75rem; color:var(--on-surface-variant);">Hope • Ascent • Major • Lift</div>
+                </div>
+                <span class="stamp-tag" style="border-color:var(--outline);">+0.8 / +1.0</span>
+              </div>
+              <div class="arc-chip" role="button" tabindex="0" onclick="addArcStep('Fall')">
+                <div>
+                  <strong style="color:var(--on-surface);">2. FALL</strong>
+                  <div style="font-size:0.75rem; color:var(--on-surface-variant);">Surrender • Gravity • Softening</div>
+                </div>
+                <span class="stamp-tag" style="border-color:var(--outline);">-0.2 / -1.0</span>
+              </div>
+              <div class="arc-chip" role="button" tabindex="0" onclick="addArcStep('Fight')">
+                <div>
+                  <strong style="color:var(--error);">3. FIGHT</strong>
+                  <div style="font-size:0.75rem; color:var(--on-surface-variant);">Defiance • Transients • Tension</div>
+                </div>
+                <span class="stamp-tag" style="border-color:var(--outline);">-0.1 / +0.6</span>
+              </div>
+              <div class="arc-chip" role="button" tabindex="0" onclick="addArcStep('Flight')">
+                <div>
+                  <strong style="color:var(--tertiary);">4. FLIGHT</strong>
+                  <div style="font-size:0.75rem; color:var(--on-surface-variant);">Urgency • Speed • Propulsion</div>
+                </div>
+                <span class="stamp-tag" style="border-color:var(--outline);">-0.3 / +1.0</span>
+              </div>
+              <div class="arc-chip" role="button" tabindex="0" onclick="addArcStep('Love')">
+                <div>
+                  <strong style="color:var(--secondary);">5. LOVE</strong>
+                  <div style="font-size:0.75rem; color:var(--on-surface-variant);">Warmth • Consonance • Intimacy</div>
+                </div>
+                <span class="stamp-tag" style="border-color:var(--outline);">+1.0 / +0.4</span>
+              </div>
+              <div class="arc-chip" role="button" tabindex="0" onclick="addArcStep('Loss')">
+                <div>
+                  <strong style="color:var(--on-surface-variant);">6. LOSS</strong>
+                  <div style="font-size:0.75rem; color:var(--on-surface-variant);">Echo • Space • Fragility • Minor</div>
+                </div>
+                <span class="stamp-tag" style="border-color:var(--outline);">-0.8 / -0.6</span>
+              </div>
+            </div>
+
+            <div style="margin-top:var(--space-md); display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
+              <span style="font-size:0.8125rem; font-family:var(--font-label); color:var(--tertiary);">Common Arcs:</span>
+              <button class="btn btn-outline btn-sm" onclick="setArcPreset(['Loss', 'Fight', 'Rise'])">Loss → Fight → Rise</button>
+              <button class="btn btn-outline btn-sm" onclick="setArcPreset(['Fight', 'Fall', 'Rise'])">Fight → Fall → Rise</button>
+              <button class="btn btn-outline btn-sm" onclick="setArcPreset(['Love', 'Loss', 'Rise'])">Love → Loss → Legacy</button>
+              <button class="btn btn-outline btn-sm" onclick="setArcPreset(['Loss', 'Rise'])">Loss → Rise</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 2: INTERACTIVE SHEET MUSIC & LEAD SHEET ENGINE                       -->
+    <!-- ========================================================================= -->
+    <section id="view-sheet" class="app-view" style="display:none;">
+      <div class="section-head">
+        <div>
+          <h2>Engraved Musical Notation & Interactive Lead Sheet Engine</h2>
+          <p>A melodic staff with clef, time signature, chord symbols, note heads, and lyric words set from your character's song. Edit the lyrics in the Song tab and the lead sheet follows.</p>
+        </div>
+        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;" class="hide-print" data-needs-person>
+          <div style="display:flex; align-items:center; gap:0.35rem;">
+            <label for="lead-genre-select" style="font-family:var(--font-label); font-size:0.75rem; text-transform:uppercase;">Genre:</label>
+            <select class="form-select" id="lead-genre-select" style="padding:0.35rem 0.6rem; font-size:0.875rem;" onchange="onGenreChanged(this.value)">
+              <option value="bolero">Bolero (Lento con sentimiento)</option>
+              <option value="salsa">Salsa Romántica (Montuno & Clave)</option>
+              <option value="blues">Slow Blues (12/8 Minor Shuffle)</option>
+              <option value="hiphop">Boom-Bap / Cinematic Hip-Hop (88 BPM)</option>
+              <option value="rnb">Soul / R&B Ballad (Warm Rhodes)</option>
+              <option value="ballad">Acoustic Folk Ballad (Arpeggio)</option>
+            </select>
+          </div>
+          <button class="btn btn-brass btn-sm" onclick="printLeadSheet()">
+            <i data-lucide="printer" style="width:13px; height:13px;"></i>
+            <span>Print Lead Sheet</span>
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="regenerateLeadSheet()">
+            <i data-lucide="refresh-cw" style="width:13px; height:13px;"></i>
+            <span>Re-Engrave Melody</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="empty-state" data-empty>
+        <i data-lucide="music" style="width:32px; height:32px; color:var(--tertiary);"></i>
+        <h3>No character yet</h3>
+        <p>Lead sheets are engraved from a character's story and song. Create a character to see theirs.</p>
+        <button class="btn btn-primary" onclick="openPersonModal()">Create a character</button>
+      </div>
+
+      <div data-needs-person>
+        <div class="audio-player-strip hide-print">
+          <div class="audio-controls">
+            <button class="btn btn-primary" id="btn-audio-play" onclick="toggleAudioPlayback()" style="background:var(--on-primary); color:var(--primary); font-weight:700;">
+              <i data-lucide="play" id="audio-play-icon" style="width:16px; height:16px;"></i>
+              <span id="audio-play-text">Audition Lead Sheet</span>
+            </button>
+            <button class="btn btn-outline btn-sm" onclick="stopAudioPlayback()" style="color:var(--on-primary); border-color:rgba(255,255,255,0.4); background:transparent;">
+              <i data-lucide="square" style="width:13px; height:13px;"></i>
+              <span>Stop</span>
+            </button>
+          </div>
+
+          <div class="audio-progress">
+            <div style="display:flex; justify-content:space-between; font-family:var(--font-label); font-size:0.75rem;">
+              <span id="audio-status-label">Synthesizer Idle • Ready to Play</span>
+              <span id="audio-time-label"></span>
+            </div>
+            <div style="background:rgba(255,255,255,0.2); height:6px; border-radius:3px; overflow:hidden; position:relative;">
+              <div id="audio-progress-bar" style="background:var(--outline); width:0%; height:100%; transition:width 100ms linear;"></div>
+            </div>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:var(--space-md); flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:0.35rem;">
+              <label for="audio-tempo-slider" style="font-family:var(--font-label); font-size:0.75rem; text-transform:uppercase;">Tempo:</label>
+              <input type="range" id="audio-tempo-slider" min="60" max="160" value="84" oninput="onTempoSliderChange(this.value)" style="width:80px; accent-color:var(--outline);">
+              <span id="audio-tempo-val" style="font-family:var(--font-label); font-size:0.75rem; width:52px;">84 BPM</span>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:0.35rem;">
+              <label for="audio-instrument-select" style="font-family:var(--font-label); font-size:0.75rem; text-transform:uppercase;">Timbre:</label>
+              <select class="form-select" id="audio-instrument-select" style="padding:0.25rem 0.5rem; font-size:0.75rem; background:rgba(255,255,255,0.15); color:white; border-color:rgba(255,255,255,0.3);" onchange="onInstrumentChanged(this.value)">
+                <option value="piano">Acoustic Grand Piano</option>
+                <option value="rhodes">Warm Rhodes EP</option>
+                <option value="guitar">Nylon Guitar</option>
+                <option value="brass">Muted Trumpet / Horn</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="sheet-music-wrapper" id="printable-lead-sheet">
+          <div class="sheet-music-header">
+            <h3 class="sheet-music-title" id="sheet-song-title"></h3>
+            <p class="sheet-music-subtitle" id="sheet-song-subtitle"></p>
+            <div class="sheet-music-meta">
+              <div>
+                <strong>Tempo / Feel:</strong> <span id="sheet-tempo-text"></span>
+                <span style="margin:0 0.5rem;">|</span>
+                <strong>Key:</strong> <span id="sheet-key-text"></span>
+              </div>
+              <div>
+                <strong>Emotional Arc:</strong> <span id="sheet-arc-text"></span>
+                <span style="margin:0 0.5rem;">|</span>
+                <strong>Voice:</strong> <span id="sheet-voice-text"></span>
+              </div>
+            </div>
+          </div>
+
+          <div style="overflow-x:auto; position:relative; min-height:320px;" id="sheet-svg-container"></div>
+
+          <div style="margin-top:var(--space-lg); border-top:var(--hairline); padding-top:var(--space-md); display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:var(--space-md);">
+            <div style="background:var(--surface-container-low); padding:var(--space-md); border-left:2px solid var(--outline);">
+              <strong style="font-family:var(--font-headline); font-size:0.9375rem; color:var(--primary);">Harmonic Architecture (Math of Emotion)</strong>
+              <p style="font-size:0.8125rem; color:var(--on-surface-variant); margin:0.35rem 0 0;" id="sheet-harmonic-analysis"></p>
+            </div>
+            <div style="background:var(--surface-container-low); padding:var(--space-md); border-left:2px solid var(--secondary);">
+              <strong style="font-family:var(--font-headline); font-size:0.9375rem; color:var(--secondary);">Lyrical Syllable Alignment</strong>
+              <p style="font-size:0.8125rem; color:var(--on-surface-variant); margin:0.35rem 0 0;" id="sheet-syllable-analysis"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 3: SUNO & LYRICAL PIPELINE                                           -->
+    <!-- ========================================================================= -->
+    <section id="view-suno" class="app-view" style="display:none;">
+      <div class="section-head">
+        <div>
+          <h2>Level 7 • Suno Prompt & Mythic Lyric Generator</h2>
+          <p>Builds a full song blueprint for Suno, Udio, or a live studio session from your character's wounds, gifts, symbols, memory, and arc. Every field is editable and saves to the character.</p>
+        </div>
+        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;" class="hide-print" data-needs-person>
+          <button class="btn btn-brass btn-sm" onclick="copyFullSunoPackage()">
+            <i data-lucide="copy" style="width:13px; height:13px;"></i>
+            <span>Copy Full Prompt Block</span>
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="aiWriteLyrics()" data-ai-button data-ai-only>
+            <i data-lucide="wand-2" style="width:13px; height:13px;"></i>
+            <span>Write Lyrics with Claude</span>
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="regenerateSunoLyrics(true)">
+            <i data-lucide="refresh-cw" style="width:13px; height:13px;"></i>
+            <span>Offline Draft</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="empty-state" data-empty>
+        <i data-lucide="sparkles" style="width:32px; height:32px; color:var(--tertiary);"></i>
+        <h3>No character yet</h3>
+        <p>Song prompts and lyrics are written from a character's own story. Create one to start.</p>
+        <button class="btn btn-primary" onclick="openPersonModal()">Create a character</button>
+      </div>
+
+      <div data-needs-person>
+        <div class="grid-2">
+          <div class="figure-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem;">
+              <div class="figure-label" style="margin-bottom:0;">Suno Style Prompt Block</div>
+              <span class="stamp-tag" id="style-edited-badge" style="display:none;">Edited</span>
+            </div>
+            <div style="position:relative; margin-top:var(--space-xs);">
+              <textarea class="form-textarea" id="suno-style-output" style="min-height:140px; font-family:var(--font-label); font-size:0.8125rem;"></textarea>
+            </div>
+            <div style="display:flex; justify-content:flex-end; margin-top:0.5rem;">
+              <button class="btn btn-outline btn-sm" onclick="aiWriteStyle()" data-ai-button data-ai-only style="margin-right:0.5rem;">Write Style with Claude</button>
+              <button class="btn btn-outline btn-sm" onclick="copyToClipboard('suno-style-output')">Copy Style</button>
+            </div>
+            <div style="margin-top:var(--space-md); padding:var(--space-sm); background:var(--surface-container); border-radius:var(--rounded); font-size:0.8125rem;">
+              <strong>Prompt Formula Applied:</strong>
+              <span style="color:var(--on-surface-variant);"> [Genre] + [Emotional Trajectory] + [Sensory Instruments] + [Telling Voice] + [BPM / Key]</span>
+            </div>
+          </div>
+
+          <div class="figure-card">
+            <div class="figure-label">Song Identity & Release Parameters</div>
+            <div style="display:flex; flex-direction:column; gap:0.5rem; margin-top:var(--space-xs);">
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="suno-song-title-input">Song Title</label>
+                <input type="text" class="form-input" id="suno-song-title-input" placeholder="Name this character's song" maxlength="120">
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="suno-album-input">Album / Catalog Node (Level 11)</label>
+                <input type="text" class="form-input" id="suno-album-input" placeholder="Optional album or collection name" maxlength="120">
+              </div>
+              <div>
+                <span style="font-size:0.75rem; font-family:var(--font-label); color:var(--on-surface-variant); text-transform:uppercase;">Narrative Arc Formula:</span>
+                <div style="font-size:0.875rem; overflow-wrap:anywhere;" id="suno-formula-display"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="figure-card" style="margin-top:var(--space-md);">
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:var(--hairline); padding-bottom:var(--space-xs); margin-bottom:var(--space-sm); gap:0.5rem; flex-wrap:wrap;">
+            <div class="figure-label" style="margin-bottom:0;">Full Lyrical Architecture: Scene (Verse) → Truth (Chorus) → Shift (Bridge) → Legacy (Outro)</div>
+            <div style="display:flex; gap:0.5rem; align-items:center;">
+              <span class="stamp-tag" id="lyrics-edited-badge" style="display:none;">Edited</span>
+              <button class="btn btn-outline btn-sm" onclick="copyToClipboard('suno-lyrics-output')">Copy Lyrics</button>
+            </div>
+          </div>
+          <p style="font-size:0.8125rem; color:var(--on-surface-variant); margin:0 0 var(--space-sm);">Start from Claude's version or the offline draft, then rewrite anything. Your edits are saved to the character.</p>
+          <textarea class="form-textarea" id="suno-lyrics-output" style="min-height:380px; font-family:var(--font-label); font-size:0.875rem; line-height:1.6;"></textarea>
+        </div>
+
+        <div class="figure-card" style="margin-top:var(--space-md);">
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:var(--hairline); padding-bottom:var(--space-xs); margin-bottom:var(--space-sm); gap:0.5rem; flex-wrap:wrap;">
+            <div class="figure-label" style="margin-bottom:0;">Beyond the Song: Short Story & Poem</div>
+            <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+              <button class="btn btn-primary btn-sm" onclick="aiWriteProse('story')" data-ai-button>Write a Short Story</button>
+              <button class="btn btn-outline btn-sm" onclick="aiWriteProse('poem')" data-ai-button>Write a Poem</button>
+              <button class="btn btn-outline btn-sm" onclick="copyToClipboard('prose-output')">Copy</button>
+            </div>
+          </div>
+          <p style="font-size:0.8125rem; color:var(--on-surface-variant); margin:0 0 var(--space-sm);">Claude writes a story or a poem in the character's telling voice, true to the memory. Use it for a eulogy, a caption, a video script, or the book. Needs Claude AI (see AI Settings), or write your own here.</p>
+          <textarea class="form-textarea" id="prose-output" style="min-height:260px; line-height:1.6;" placeholder="A short story or poem about this character will appear here. You can also write or paste your own."></textarea>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 4: LEGACY VAULT                                                      -->
+    <!-- ========================================================================= -->
+    <section id="view-vault" class="app-view" style="display:none;">
+      <div class="section-head">
+        <div>
+          <h2>Level 10 • The Permanent Legacy Vault</h2>
+          <p>Your archive of people. Every record keeps the character's story, symbols, wounds and gifts, song, and connections. Export it regularly to keep a backup.</p>
+        </div>
+        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;" class="hide-print">
+          <button class="btn btn-primary btn-sm" onclick="openPersonModal()">
+            <i data-lucide="user-plus" style="width:13px; height:13px;"></i>
+            <span>+ Add Character</span>
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="exportVaultJSON()">
+            <i data-lucide="download" style="width:13px; height:13px;"></i>
+            <span>Export Backup</span>
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="triggerImport()">
+            <i data-lucide="upload" style="width:13px; height:13px;"></i>
+            <span>Import Backup</span>
+          </button>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:var(--space-md); margin-bottom:var(--space-md); flex-wrap:wrap; align-items:flex-end;" data-needs-person>
+        <div style="flex:1; min-width:220px;" class="form-group">
+          <label class="form-label" for="vault-search-input">Search Characters & Symbols</label>
+          <input type="text" class="form-input" id="vault-search-input" placeholder="Search by name, place, symbol, or words in a memory" oninput="renderVaultGrid()">
+        </div>
+        <div style="width:220px; max-width:100%;" class="form-group">
+          <label class="form-label" for="vault-role-filter">Filter by Archetype</label>
+          <select class="form-select" id="vault-role-filter" onchange="renderVaultGrid()"></select>
+        </div>
+      </div>
+
+      <div class="empty-state" data-empty>
+        <i data-lucide="archive" style="width:32px; height:32px; color:var(--tertiary);"></i>
+        <h3>The vault is empty</h3>
+        <p>Add a character, or import a backup you exported earlier.</p>
+        <div style="display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="openPersonModal()">Create a character</button>
+          <button class="btn btn-outline" onclick="triggerImport()">Import a backup</button>
+        </div>
+      </div>
+
+      <div class="card-grid" id="vault-people-grid"></div>
+
+      <div class="figure-card hide-print" style="margin-top:var(--space-lg);">
+        <div class="figure-label">Privacy & Your Data</div>
+        <p style="font-size:0.875rem; margin:0.35rem 0 var(--space-sm);">Everything you enter is stored only in this browser on this device. Nothing is uploaded. Clearing your browser data, or using a private window, will erase it, so export a backup after each session.</p>
+        <button class="btn btn-outline btn-sm" onclick="eraseAllData()">
+          <i data-lucide="trash-2" style="width:13px; height:13px;"></i>
+          <span>Erase all data on this device</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 5: RELATIONSHIP GRAPH (Level 9)                                      -->
+    <!-- ========================================================================= -->
+    <section id="view-graph" class="app-view" style="display:none;">
+      <div class="section-head">
+        <div>
+          <h2>Level 9 • The Living Relationship Engine</h2>
+          <p>"People connect to people." Link your characters across families, neighborhoods, eras, and events, and describe what ties them together.</p>
+        </div>
+        <div style="display:flex; gap:0.5rem;" class="hide-print" data-needs-person>
+          <button class="btn btn-outline btn-sm" onclick="centerGraphView()">Center Graph</button>
+          <button class="btn btn-brass btn-sm" onclick="openLinkModal()">+ Add Connection</button>
+        </div>
+      </div>
+
+      <div class="empty-state" data-empty>
+        <i data-lucide="git-fork" style="width:32px; height:32px; color:var(--tertiary);"></i>
+        <h3>No characters to connect yet</h3>
+        <p>Add at least two characters, then connect them here.</p>
+        <button class="btn btn-primary" onclick="openPersonModal()">Create a character</button>
+      </div>
+
+      <div data-needs-person>
+        <div class="figure-card" style="padding:0; overflow:hidden; position:relative; background:#fffdf8;">
+          <svg id="relational-graph-svg" style="width:100%; height:520px; display:block;" viewBox="0 0 1000 520" role="img" aria-label="Relationship graph of your characters"></svg>
+          <div style="position:absolute; bottom:16px; left:16px; right:16px; background:rgba(247, 244, 236, 0.95); border:1px solid var(--outline); padding:var(--space-sm) var(--space-md); border-radius:var(--rounded); font-size:0.75rem; font-family:var(--font-label); max-width:340px;" id="graph-node-details">
+            <strong>Interactive Graph:</strong>
+            <div style="color:var(--on-surface-variant); margin-top:0.25rem;">Click a person to open their record. Use "+ Add Connection" to link two characters.</div>
+          </div>
+        </div>
+
+        <div class="figure-card" style="margin-top:var(--space-md);">
+          <div class="figure-label">Connections</div>
+          <div id="graph-links-list" style="display:flex; flex-direction:column; gap:0.5rem; margin-top:var(--space-sm);"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 6: BOOK ENGINE (Level 12)                                            -->
+    <!-- ========================================================================= -->
+    <section id="view-book" class="app-view" style="display:none;">
+      <div class="section-head">
+        <div>
+          <h2>Level 12 • The Book Publishing Engine</h2>
+          <p>Compiles your whole vault (characters, memories, symbols, and songs) into a printable commemorative book. Use your browser's print dialog to save it as a PDF.</p>
+        </div>
+        <div style="display:flex; gap:0.5rem;" class="hide-print">
+          <button class="btn btn-primary btn-sm" onclick="compileBookEngine(true)">
+            <i data-lucide="book" style="width:13px; height:13px;"></i>
+            <span>Compile Book</span>
+          </button>
+          <button class="btn btn-brass btn-sm" onclick="window.print()">
+            <i data-lucide="printer" style="width:13px; height:13px;"></i>
+            <span>Print / Save as PDF</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="figure-card hide-print" style="max-width:900px; margin:0 auto var(--space-md);">
+        <div class="figure-label">Book Details</div>
+        <div class="grid-2" style="margin-top:var(--space-sm);">
+          <div class="form-group">
+            <label class="form-label" for="book-title-input">Book Title</label>
+            <input type="text" class="form-input" id="book-title-input" placeholder="Nobody Gets Forgotten" maxlength="140" data-book-field="title">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="book-author-input">Compiled By</label>
+            <input type="text" class="form-input" id="book-author-input" placeholder="Your name or family name" maxlength="140" data-book-field="author">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="book-subtitle-input">Subtitle</label>
+          <input type="text" class="form-input" id="book-subtitle-input" placeholder="Optional subtitle" maxlength="200" data-book-field="subtitle">
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label" for="book-preface-input">Preface</label>
+          <textarea class="form-textarea" id="book-preface-input" placeholder="Optional. Why you're putting these stories down, and who they're for." data-book-field="preface"></textarea>
+        </div>
+      </div>
+
+      <div class="figure-card" id="book-content-container" style="background:#fffdfa; padding:var(--space-xl); max-width:900px; margin:0 auto; box-shadow:0 4px 16px rgba(20,33,61,0.06);">
+        <div style="text-align:center; border-bottom:3px double var(--outline); padding-bottom:var(--space-xl); margin-bottom:var(--space-xl);">
+          <div style="font-family:var(--font-label); font-size:0.8125rem; letter-spacing:0.15em; text-transform:uppercase; color:var(--tertiary);">The Permanent Heritage Series</div>
+          <h1 style="font-family:var(--font-headline); font-size:2.5rem; margin:0.5rem 0; font-weight:400; color:var(--primary); overflow-wrap:anywhere;" id="book-title-display"></h1>
+          <p style="font-family:var(--font-headline); font-size:1.15rem; font-style:italic; color:var(--on-surface-variant); margin:0;" id="book-subtitle-display"></p>
+          <div style="margin-top:var(--space-md); font-family:var(--font-label); font-size:0.8125rem; color:var(--on-surface);" id="book-byline-display"></div>
+        </div>
+
+        <div style="margin-bottom:var(--space-xl);" id="book-preface-section">
+          <h3 style="font-family:var(--font-headline); border-bottom:var(--brass-rule); padding-bottom:0.25rem;">Preface</h3>
+          <div id="book-preface-display"></div>
+        </div>
+
+        <div style="margin-bottom:var(--space-xl);">
+          <h3 style="font-family:var(--font-headline); border-bottom:var(--brass-rule); padding-bottom:0.25rem;">Section I: The People Register</h3>
+          <div id="book-people-list" style="display:flex; flex-direction:column; gap:var(--space-md); margin-top:var(--space-md);"></div>
+        </div>
+
+        <div style="margin-bottom:var(--space-xl);">
+          <h3 style="font-family:var(--font-headline); border-bottom:var(--brass-rule); padding-bottom:0.25rem;">Section II: The Living Symbol Glossary</h3>
+          <div id="book-symbols-list" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:var(--space-md); margin-top:var(--space-md);"></div>
+        </div>
+
+        <div>
+          <h3 style="font-family:var(--font-headline); border-bottom:var(--brass-rule); padding-bottom:0.25rem;">Section III: Musical Catalog</h3>
+          <p style="font-size:0.875rem; color:var(--on-surface-variant);">Every person in the book is commemorated with a song.</p>
+          <div id="book-songs-list" style="margin-top:var(--space-md);"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 7: MULTI-MODEL AI (BYOK) ENGINE                                      -->
+    <!-- ========================================================================= -->
+    <section id="view-byok" class="app-view" style="display:none;">
+      <div class="section-head">
+        <div>
+          <h2>AI Settings • Claude Creative Engine</h2>
+          <p>Claude can write lyrics, short stories, poems, and style prompts from your characters, and tag memories for you. Try it with free samples, or use your own Anthropic key. The offline engine always works, with no account and no internet.</p>
+        </div>
+        <div>
+          <span class="stamp-tag selected" id="byok-mode-badge">Claude AI Active</span>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="figure-card">
+          <div class="figure-label">Engine</div>
+          <div class="form-group" style="margin-top:var(--space-md);">
+            <label class="form-label" for="model-engine-mode">Active Engine</label>
+            <select class="form-select" id="model-engine-mode" onchange="onModelModeChange(this.value)">
+              <option value="claude">Claude AI (free samples, or your own key)</option>
+              <option value="offline">Built-in Offline Engine (nothing leaves this device)</option>
+            </select>
+          </div>
+
+          <div style="padding:var(--space-sm) var(--space-md); background:var(--surface-container-low); border:1px solid var(--outline-variant); border-radius:var(--rounded); font-size:0.875rem;" id="ai-access-status">
+            Checking AI access…
+          </div>
+
+          <div class="form-group" style="margin-top:var(--space-md);">
+            <label class="form-label" for="param-density-slider">Archetypal Density (Literal ↔ Mythic Language)</label>
+            <div style="display:flex; align-items:center; gap:0.5rem;">
+              <input type="range" class="form-input" id="param-density-slider" min="1" max="5" step="1" value="4" style="flex:1;" oninput="updateParamLabels()">
+              <span id="param-density-val" style="font-family:var(--font-label); font-size:0.8125rem; width:40px;">4 / 5</span>
+            </div>
+          </div>
+
+          <div style="margin-top:var(--space-md); padding:var(--space-sm); background:var(--surface-container-low); border:1px solid var(--outline-variant); border-radius:var(--rounded);">
+            <div style="font-size:0.75rem; font-family:var(--font-label); color:var(--tertiary); text-transform:uppercase;">What gets sent</div>
+            <p style="font-size:0.8125rem; color:var(--on-surface); margin:0.25rem 0 0;">
+              Only when you press an AI button, the active character's record (name, place, memory, tags, and lyrics) is sent to Anthropic's Claude to write that piece. It isn't stored by this app. In offline mode nothing leaves your device. See the <a href="/privacy" target="_blank" rel="noopener">privacy policy</a>.
+            </p>
+          </div>
+        </div>
+
+        <div class="figure-card">
+          <div class="figure-label">Your Own Anthropic Key (Optional)</div>
+          <p style="font-size:0.8125rem; color:var(--on-surface-variant); margin-top:0.25rem;">
+            Used after your free samples run out, so you pay Anthropic directly for your own use. Get a key at console.anthropic.com. Your key goes only to this app's server to make your request, and is never stored there.
+          </p>
+
+          <div class="form-group" style="margin-top:var(--space-md);">
+            <label class="form-label" for="api-claude-key">Anthropic API Key</label>
+            <input type="password" class="form-input" id="api-claude-key" placeholder="sk-ant-..." autocomplete="off" spellcheck="false">
+          </div>
+
+          <label style="display:flex; gap:0.5rem; align-items:flex-start; font-size:0.8125rem; margin-bottom:var(--space-sm);">
+            <input type="checkbox" id="api-remember-key" style="margin-top:0.2rem;">
+            <span>Remember my key on this device. Leave unchecked on shared computers; the key is then forgotten when you close the tab.</span>
+          </label>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:var(--space-md); padding-top:var(--space-sm); border-top:var(--hairline); gap:0.5rem; flex-wrap:wrap;">
+            <button class="btn btn-brass btn-sm" onclick="saveAPIKeys()">Use This Key</button>
+            <button class="btn btn-outline btn-sm" onclick="clearAPIKeys()">Remove Key</button>
+          </div>
+
+          <div style="margin-top:var(--space-md); padding:var(--space-sm) var(--space-md); border:1px dashed var(--outline); border-radius:var(--rounded); font-size:0.8125rem;">
+            <strong>Subscriptions are coming.</strong> Soon you'll be able to subscribe and use Mythical Creator's AI without managing a key.
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="app-footer hide-print">
+    <div>The Mythical Creator • Legacy Builder™ v2.0 • Architecture by Billy Adono Robles</div>
+    <div>Your stories are stored only in this browser. Export a backup from the Legacy Vault.</div>
+    <div><a href="/" style="color:inherit;">Home</a> • <a href="/privacy" style="color:inherit;">Privacy</a> • <a href="/terms" style="color:inherit;">Terms</a></div>
+  </footer>
+
+  <!-- MODAL: ADD CUSTOM CATEGORY / LEXICON TAG -->
+  <div class="modal-overlay" id="custom-category-modal" role="dialog" aria-modal="true" aria-labelledby="custom-modal-title">
+    <div class="modal-dialog">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:var(--brass-rule); padding-bottom:var(--space-sm); margin-bottom:var(--space-md);">
+        <h3 id="custom-modal-title" style="font-family:var(--font-headline); font-size:1.35rem; margin:0; color:var(--primary);">Extensible Lexicon • Add Custom Elements</h3>
+        <button class="btn btn-outline btn-sm" onclick="closeModal('custom-category-modal')" aria-label="Close">✕</button>
+      </div>
+      <p style="font-size:0.875rem; color:var(--on-surface-variant); margin-top:0;">
+        Go beyond the core 12 Wounds and 12 Gifts. Add the roles, symbols, and archetypes that belong to your people and your places. New wounds, gifts, and symbols are added to the active character.
+      </p>
+
+      <form onsubmit="handleCustomCategorySubmit(event)">
+        <div class="form-group">
+          <label class="form-label" for="custom-type-select">Category Type to Extend</label>
+          <select class="form-select" id="custom-type-select">
+            <option value="wounds">Wound (Rupture / crack in worldview)</option>
+            <option value="gifts">Gift (Strength / resilience born from it)</option>
+            <option value="symbols">Sensory Symbol (Physical object or place in the story)</option>
+            <option value="archetypes">Archetype (Mythic character identity)</option>
+            <option value="roles">Community Role (Title within a neighborhood or family)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="custom-name-input">Item Name</label>
+          <input type="text" class="form-input" id="custom-name-input" placeholder="Name of the wound, gift, symbol, archetype, or role" maxlength="60" required>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:var(--space-sm); margin-top:var(--space-lg);">
+          <button type="button" class="btn btn-outline" onclick="closeModal('custom-category-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add to Lexicon</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CREATE / EDIT CHARACTER -->
+  <div class="modal-overlay" id="person-modal" role="dialog" aria-modal="true" aria-labelledby="person-modal-title">
+    <div class="modal-dialog">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:var(--brass-rule); padding-bottom:var(--space-sm); margin-bottom:var(--space-md);">
+        <h3 id="person-modal-title" style="font-family:var(--font-headline); font-size:1.35rem; margin:0; color:var(--primary);">New Character</h3>
+        <button class="btn btn-outline btn-sm" onclick="closeModal('person-modal')" aria-label="Close">✕</button>
+      </div>
+
+      <form onsubmit="handlePersonSubmit(event)">
+        <input type="hidden" id="person-edit-id">
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label" for="person-name">Full Name *</label>
+            <input type="text" class="form-input" id="person-name" placeholder="Their full name" maxlength="100" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="person-nickname">Nickname / What People Called Them</label>
+            <input type="text" class="form-input" id="person-nickname" placeholder="Optional" maxlength="60">
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label" for="person-location">Place</label>
+            <input type="text" class="form-input" id="person-location" placeholder="Neighborhood, town, or street" maxlength="120">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="person-role">Role in the Community or Family</label>
+            <input type="text" class="form-input" id="person-role" list="role-datalist" placeholder="How people knew them" maxlength="80">
+            <datalist id="role-datalist"></datalist>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="person-summary">Short Summary (1 to 3 sentences)</label>
+          <textarea class="form-textarea" id="person-summary" placeholder="Who were they? Why must they never be forgotten?" maxlength="600"></textarea>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label" for="person-archetype">Primary Archetype</label>
+            <select class="form-select" id="person-archetype"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="person-voice">Telling Voice</label>
+            <select class="form-select" id="person-voice"></select>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label" for="person-song-title">Song Title</label>
+            <input type="text" class="form-input" id="person-song-title" placeholder="Optional. We'll suggest one." maxlength="120">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="person-symbols">Symbols (comma separated)</label>
+            <input type="text" class="form-input" id="person-symbols" placeholder="Objects or places tied to them" maxlength="300">
+          </div>
+        </div>
+
+        <p style="font-size:0.75rem; color:var(--on-surface-variant); margin:0;">If this is a living person, make sure they're comfortable with their story being recorded and shared.</p>
+
+        <div style="display:flex; justify-content:flex-end; gap:var(--space-sm); margin-top:var(--space-lg);">
+          <button type="button" class="btn btn-outline" onclick="closeModal('person-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="person-submit-btn">Create Character</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD CONNECTION -->
+  <div class="modal-overlay" id="link-modal" role="dialog" aria-modal="true" aria-labelledby="link-modal-title">
+    <div class="modal-dialog">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:var(--brass-rule); padding-bottom:var(--space-sm); margin-bottom:var(--space-md);">
+        <h3 id="link-modal-title" style="font-family:var(--font-headline); font-size:1.35rem; margin:0; color:var(--primary);">Add a Connection</h3>
+        <button class="btn btn-outline btn-sm" onclick="closeModal('link-modal')" aria-label="Close">✕</button>
+      </div>
+      <form onsubmit="handleLinkSubmit(event)">
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label" for="link-from">From</label>
+            <select class="form-select" id="link-from"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="link-to">To</label>
+            <select class="form-select" id="link-to"></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="link-label">What ties them together?</label>
+          <input type="text" class="form-input" id="link-label" placeholder="e.g. Brother, Mentor, Neighbors for 30 years" maxlength="80" required>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:var(--space-sm); margin-top:var(--space-lg);">
+          <button type="button" class="btn btn-outline" onclick="closeModal('link-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Connection</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <input type="file" id="import-file-input" accept="application/json,.json" style="display:none;">
+  <div class="toast" id="app-toast" role="status" aria-live="polite"></div>
+
+  <script>
+    /* ========================================================================= */
+    /* 1. STATE, STORAGE & HELPERS                                               */
+    /* ========================================================================= */
+    const STORAGE_KEY = "mythicalCreator.vault.v1";
+
+    const VOICES = [
+      ["The Block", "The Block (Collective Neighborhood Voice)"],
+      ["The Witness", "The Witness (Unvarnished Truth)"],
+      ["The Family", "The Family (Lineage & Grief)"],
+      ["The Child", "The Child (Wide-eyed Memory)"],
+      ["The Elder", "The Elder (Ancestral Weight)"],
+      ["The Future", "The Future (Legacy Echo)"]
+    ];
+
+    const ARC_VECTORS = {
+      "Rise":   [0.8, 0.4, 1.0],
+      "Fall":   [-0.2, -0.6, -1.0],
+      "Fight":  [-0.1, 1.0, 0.6],
+      "Flight": [-0.3, 0.8, 1.0],
+      "Love":   [1.0, 0.2, 0.4],
+      "Loss":   [-0.8, -0.4, -0.6]
+    };
+
+    const DEFAULT_LEXICON = {
+      wounds: ["Pain", "Trust", "Loss", "War", "Addiction", "Loneliness", "Disappointment", "Shame", "Fear", "Abandonment", "Identity", "Betrayal"],
+      gifts: ["Community", "Wisdom", "Family", "Humor", "Faith", "Resilience", "Survival", "Legacy", "Creativity", "Redemption", "Love", "Leadership"],
+      symbols: ["Photograph", "Letter", "Car", "Kitchen Table", "Front Steps", "Church", "River", "Streetlight", "Old Radio", "Work Boots", "Ring", "Garden"],
+      archetypes: ["Neighborhood Saint", "Hero", "Survivor", "Witness", "Teacher", "Builder", "Protector", "Operator", "Dreamer", "Lost Soul", "Trickster", "Rebel"],
+      roles: ["Matriarch", "Patriarch", "Neighborhood Elder", "Caregiver", "Street Musician", "Union Steward", "Coach", "Teacher", "Shop Owner", "Veteran"]
+    };
+
+    const GENRE_LABELS = {
+      bolero: "Bolero", salsa: "Salsa", blues: "Slow Blues", hiphop: "Cinematic Hip-Hop", rnb: "Soul / R&B", ballad: "Acoustic Folk Ballad"
+    };
+
+    const GENRE_STYLES = {
+      bolero: "Bolero, lento con sentimiento, intimate acoustic piano, warm nylon guitar, walking upright bass, soft congas, brass swells, heartfelt vocal with reverence, 84 bpm, minor resolving to major, cinematic storytelling, vintage tape warmth",
+      salsa: "Classic 1970s salsa dura, montuno piano, syncopated bass tumbao, bongos and timbales, roaring trombone section, passionate vocal with coro, 96 bpm, celebratory yet solemn",
+      blues: "Slow blues, 12/8 shuffle, weeping electric guitar with tube overdrive, Hammond B3 organ, upright bass, raspy soulful vocal, 68 bpm, raw emotional grit, late-night atmosphere",
+      hiphop: "Boom-bap cinematic hip-hop, dusty vinyl drums, melancholic piano sample loop, heavy sub bass, crisp snare, conscious storytelling rap, 88 bpm, street-level realism",
+      rnb: "Warm neo-soul R&B ballad, vintage Rhodes electric piano, smooth fretless bass, lush vocal harmonies, gentle rimshot groove, 76 bpm, intimate and healing",
+      ballad: "Intimate acoustic folk ballad, fingerpicked steel-string guitar, warm cello counter-melody, honest unpolished vocal, 66 bpm, reflective, timeless biographical memorial"
+    };
+
+    const HARMONIC_NOTES = {
+      bolero: "A descending minor progression (Cm7 → Fm7 → B♭7 → E♭maj7) carries the weight of the opening, then lifts through A♭maj7 and a tense G7(♭9) before resolving to C major for the final release.",
+      salsa: "Dm7 → Gm7 → A7(♭9) → Dm is a classic minor montuno cycle. The altered dominant builds the tension that the coro releases.",
+      blues: "Am7 → Dm7 → E7♯9 → Am7 in a 12/8 shuffle. The sharp-nine turnaround is the cry; the return home is the acceptance.",
+      hiphop: "Fm7 → B♭m7 → C7alt → Fm loops like a sampled piano phrase, leaving space for the verse to carry the story.",
+      rnb: "E♭maj9 → Cm7 → Fm9 → B♭13: extended chords keep the harmony warm and slightly unresolved, like a memory you're still holding.",
+      ballad: "G → Em7 → Cadd9 → D in 3/4 time: open, fingerpicked shapes that keep the words up front."
+    };
+
+    function freshState() {
+      return {
+        version: 1,
+        people: [],
+        links: [],
+        lexicon: JSON.parse(JSON.stringify(DEFAULT_LEXICON)),
+        activePersonId: null,
+        book: { title: "", subtitle: "", author: "", preface: "" },
+        settings: { modelMode: "claude", density: 4 }
+      };
+    }
+
+    let appState = freshState();
+    let apiKey = ""; // only persisted if the user ticks "remember my key"
+    let currentTab = "intake";
+    let saveTimer = null;
+    let storageWarned = false;
+
+    function $(id) { return document.getElementById(id); }
+
+    function esc(value) {
+      return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    }
+
+    function uid(prefix) {
+      return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    }
+
+    function uniq(list) {
+      const seen = new Set();
+      return list.filter(item => {
+        const key = String(item).toLowerCase();
+        if (!item || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
+
+    function wordCount(text) {
+      return String(text || "").trim().split(/\s+/).filter(Boolean).length;
+    }
+
+    function normalizePerson(p) {
+      const now = new Date().toISOString();
+      return {
+        id: p.id || uid("person"),
+        name: String(p.name || "Unnamed").slice(0, 100),
+        nickname: String(p.nickname || ""),
+        location: String(p.location || ""),
+        role: String(p.role || ""),
+        archetype: String(p.archetype || ""),
+        voice: String(p.voice || "The Family"),
+        summary: String(p.summary || ""),
+        rawMemory: String(p.rawMemory || ""),
+        wounds: Array.isArray(p.wounds) ? p.wounds.map(String) : [],
+        gifts: Array.isArray(p.gifts) ? p.gifts.map(String) : [],
+        symbols: Array.isArray(p.symbols) ? p.symbols.map(String) : [],
+        arc: Array.isArray(p.arc) ? p.arc.filter(a => ARC_VECTORS[a]).slice(0, 4) : [],
+        genre: MELODIES[p.genre] ? p.genre : "bolero",
+        songTitle: String(p.songTitle || ""),
+        album: String(p.album || ""),
+        lyrics: String(p.lyrics || ""),
+        style: String(p.style || ""),
+        prose: String(p.prose || ""),
+        createdAt: p.createdAt || now,
+        updatedAt: p.updatedAt || now
+      };
+    }
+
+    function mergeState(saved) {
+      const base = freshState();
+      if (!saved || typeof saved !== "object") return base;
+      base.people = Array.isArray(saved.people) ? saved.people.map(normalizePerson) : [];
+      const ids = new Set(base.people.map(p => p.id));
+      base.links = Array.isArray(saved.links)
+        ? saved.links.filter(l => l && ids.has(l.from) && ids.has(l.to)).map(l => ({ id: l.id || uid("link"), from: l.from, to: l.to, label: String(l.label || "") }))
+        : [];
+      if (saved.lexicon && typeof saved.lexicon === "object") {
+        Object.keys(base.lexicon).forEach(k => {
+          if (Array.isArray(saved.lexicon[k])) base.lexicon[k] = uniq(base.lexicon[k].concat(saved.lexicon[k].map(String)));
+        });
+      }
+      if (saved.book && typeof saved.book === "object") {
+        Object.keys(base.book).forEach(k => { base.book[k] = String(saved.book[k] || ""); });
+      }
+      if (saved.settings && typeof saved.settings === "object") {
+        base.settings.modelMode = saved.settings.modelMode === "offline" ? "offline" : "claude";
+        base.settings.density = Number(saved.settings.density) || 4;
+      }
+      base.activePersonId = ids.has(saved.activePersonId) ? saved.activePersonId : (base.people[0] ? base.people[0].id : null);
+      return base;
+    }
+
+    function loadState() {
+      try {
+        const raw = window.localStorage.getItem(STORAGE_KEY);
+        appState = raw ? mergeState(JSON.parse(raw)) : freshState();
+      } catch (e) {
+        appState = freshState();
+      }
+    }
+
+    function saveState() {
+      clearTimeout(saveTimer);
+      saveTimer = null;
+      try {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+        const status = $("memory-save-status");
+        if (status) status.textContent = "Saved on this device";
+      } catch (e) {
+        if (!storageWarned) {
+          storageWarned = true;
+          showToast("This browser isn't letting us save. Export a backup from the Legacy Vault so you don't lose your work.", 6000);
+        }
+      }
+    }
+
+    function scheduleSave() {
+      const status = $("memory-save-status");
+      if (status) status.textContent = "Saving…";
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(saveState, 400);
+    }
+
+    window.addEventListener("beforeunload", () => { if (saveTimer) saveState(); });
+
+    let toastTimer = null;
+    function showToast(message, ms) {
+      const t = $("app-toast");
+      if (!t) return;
+      t.textContent = message;
+      t.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove("show"), ms || 3200);
+    }
+
+    function closeModal(id) {
+      const m = $(id);
+      if (m) m.classList.remove("open");
+    }
+
+    function openModal(id, focusId) {
+      const m = $(id);
+      if (!m) return;
+      m.classList.add("open");
+      if (focusId) setTimeout(() => { const f = $(focusId); if (f) f.focus(); }, 50);
+    }
+
+    function getActivePerson() {
+      return appState.people.find(p => p.id === appState.activePersonId) || null;
+    }
+
+    function touch(p) {
+      p.updatedAt = new Date().toISOString();
+      scheduleSave();
+    }
+
+    function currentGenre() {
+      const p = getActivePerson();
+      return (p && MELODIES[p.genre]) ? p.genre : "bolero";
+    }
+
+    function computeLegacyScore(p) {
+      let score = 0;
+      if (p.name) score += 5;
+      if (p.summary) score += 10;
+      if (p.location) score += 5;
+      score += Math.min(25, Math.round(wordCount(p.rawMemory) / 4));
+      score += Math.min(10, p.wounds.length * 5);
+      score += Math.min(10, p.gifts.length * 5);
+      score += Math.min(15, p.symbols.length * 5);
+      if (p.arc.length) score += 5;
+      if (p.songTitle) score += 5;
+      const links = appState.links.filter(l => l.from === p.id || l.to === p.id).length;
+      score += Math.min(10, links * 5);
+      return Math.min(100, score);
+    }
+
+    function displayTitle(p) {
+      if (!p) return "";
+      return p.songTitle || `The Ballad of ${p.nickname || p.name}`;
+    }
+
+    /* ========================================================================= */
+    /* 2. MUSIC DATA                                                             */
+    /* ========================================================================= */
+    let audioCtx = null;
+    let isPlayingAudio = false;
+    let playbackTimer = null;
+    let currentNoteIndex = 0;
+    let currentTempoBpm = 84;
+    let currentInstrument = "piano";
+
+    // Musical scales and frequency helpers (A4 = 440 Hz)
+    const NOTE_FREQS = {
+      "C3": 130.81, "D3": 146.83, "Eb3": 155.56, "E3": 164.81, "F3": 174.61, "G3": 196.00, "Ab3": 207.65, "A3": 220.00, "Bb3": 233.08, "B3": 246.94,
+      "C4": 261.63, "D4": 293.66, "Eb4": 311.13, "E4": 329.63, "F4": 349.23, "F#4": 369.99, "G4": 392.00, "Ab4": 415.30, "A4": 440.00, "Bb4": 466.16, "B4": 493.88,
+      "C#4": 277.18, "Db4": 277.18, "F#3": 185.00, "G#3": 207.65, "C5": 523.25, "C#5": 554.37, "Db5": 554.37, "D5": 587.33, "Eb5": 622.25, "E5": 659.25, "F5": 698.46, "G5": 783.99, "Ab5": 830.61, "A5": 880.00, "Bb5": 932.33, "C6": 1046.50
+    };
+
+    // Melody definitions by genre & emotional arc
+    const MELODIES = {
+      bolero: {
+        key: "C Minor / E♭ Major",
+        timeSig: "4/4",
+        tempo: 84,
+        tempoText: "Andante maestoso • ♩ = 84",
+        measures: [
+          {
+            number: 1,
+            chord: "Cm7",
+            section: "VERSE 1",
+            notes: [
+              { pitch: "G4", duration: 1.0, yPos: 30, type: "quarter" },
+              { pitch: "C5", duration: 1.0, yPos: 15, type: "quarter" },
+              { pitch: "Eb5", duration: 1.0, yPos: 5, type: "quarter" },
+              { pitch: "D5", duration: 1.0, yPos: 10, type: "quarter" }
+            ],
+            bassChord: ["C3", "Eb3", "G3", "Bb3"]
+          },
+          {
+            number: 2,
+            chord: "Fm7",
+            section: "",
+            notes: [
+              { pitch: "C5", duration: 1.5, yPos: 15, type: "dotted-quarter" },
+              { pitch: "Ab4", duration: 0.5, yPos: 25, type: "eighth" },
+              { pitch: "G4", duration: 1.0, yPos: 30, type: "quarter" },
+              { pitch: "F4", duration: 1.0, yPos: 35, type: "quarter" }
+            ],
+            bassChord: ["F3", "Ab3", "C4", "Eb4"]
+          },
+          {
+            number: 3,
+            chord: "Bb7",
+            section: "",
+            notes: [
+              { pitch: "D5", duration: 1.0, yPos: 10, type: "quarter" },
+              { pitch: "F5", duration: 1.0, yPos: 0, type: "quarter" },
+              { pitch: "Eb5", duration: 1.0, yPos: 5, type: "quarter" },
+              { pitch: "D5", duration: 1.0, yPos: 10, type: "quarter" }
+            ],
+            bassChord: ["Bb3", "D4", "F4", "Ab4"]
+          },
+          {
+            number: 4,
+            chord: "Ebmaj7",
+            section: "CHORUS",
+            notes: [
+              { pitch: "Eb5", duration: 2.0, yPos: 5, type: "half" },
+              { pitch: "G4", duration: 1.0, yPos: 30, type: "quarter" },
+              { pitch: "Bb4", duration: 1.0, yPos: 20, type: "quarter" }
+            ],
+            bassChord: ["Eb3", "G3", "Bb3", "D4"]
+          },
+          {
+            number: 5,
+            chord: "Abmaj7",
+            section: "",
+            notes: [
+              { pitch: "C5", duration: 1.0, yPos: 15, type: "quarter" },
+              { pitch: "Eb5", duration: 1.0, yPos: 5, type: "quarter" },
+              { pitch: "G5", duration: 1.0, yPos: -5, type: "quarter" },
+              { pitch: "F5", duration: 1.0, yPos: 0, type: "quarter" }
+            ],
+            bassChord: ["Ab3", "C4", "Eb4", "G4"]
+          },
+          {
+            number: 6,
+            chord: "G7(b9)",
+            section: "",
+            notes: [
+              { pitch: "D5", duration: 1.0, yPos: 10, type: "quarter" },
+              { pitch: "B4", duration: 1.0, yPos: 20, type: "quarter" },
+              { pitch: "Ab4", duration: 1.0, yPos: 25, type: "quarter" },
+              { pitch: "G4", duration: 1.0, yPos: 30, type: "quarter" }
+            ],
+            bassChord: ["G3", "B3", "D4", "F4", "Ab4"]
+          },
+          {
+            number: 7,
+            chord: "Cm(add9)",
+            section: "OUTRO",
+            notes: [
+              { pitch: "C5", duration: 2.0, yPos: 15, type: "half" },
+              { pitch: "D5", duration: 1.0, yPos: 10, type: "quarter" },
+              { pitch: "Eb5", duration: 1.0, yPos: 5, type: "quarter" }
+            ],
+            bassChord: ["C3", "Eb3", "G3", "D4"]
+          },
+          {
+            number: 8,
+            chord: "Cmaj7",
+            section: "",
+            notes: [
+              { pitch: "E5", duration: 4.0, yPos: 5, type: "whole" }
+            ],
+            bassChord: ["C3", "E3", "G3", "B3"]
+          }
+        ]
+      },
+      salsa: {
+        key: "D Minor / F Major",
+        timeSig: "4/4",
+        tempo: 96,
+        tempoText: "Allegro con montuno • ♩ = 96",
+        measures: [
+          {
+            number: 1,
+            chord: "Dm7",
+            section: "MONTUNO",
+            notes: [
+              { pitch: "A4", duration: 0.5, yPos: 25, type: "eighth" },
+              { pitch: "D5", duration: 1.0, yPos: 10, type: "quarter" },
+              { pitch: "F5", duration: 0.5, yPos: 0, type: "eighth" },
+              { pitch: "E5", duration: 1.0, yPos: 5, type: "quarter" },
+              { pitch: "D5", duration: 1.0, yPos: 10, type: "quarter" }
+            ],
+            bassChord: ["D3", "F3", "A3", "C4"]
+          },
+          {
+            number: 2,
+            chord: "Gm7",
+            section: "",
+            notes: [
+              { pitch: "Bb4", duration: 1.0, yPos: 20, type: "quarter" },
+              { pitch: "D5", duration: 1.0, yPos: 10, type: "quarter" },
+              { pitch: "G4", duration: 1.0, yPos: 30, type: "quarter" },
+              { pitch: "Bb4", duration: 1.0, yPos: 20, type: "quarter" }
+            ],
+            bassChord: ["G3", "Bb3", "D4", "F4"]
+          },
+          {
+            number: 3,
+            chord: "A7(b9)",
+            section: "CORO",
+            notes: [
+              { pitch: "C#5", duration: 1.0, yPos: 15, type: "quarter" },
+              { pitch: "E5", duration: 1.0, yPos: 5, type: "quarter" },
+              { pitch: "G5", duration: 1.0, yPos: -5, type: "quarter" },
+              { pitch: "F5", duration: 1.0, yPos: 0, type: "quarter" }
+            ],
+            bassChord: ["A3", "C#4", "E4", "G4"]
+          },
+          {
+            number: 4,
+            chord: "Dm",
+            section: "",
+            notes: [
+              { pitch: "D5", duration: 4.0, yPos: 10, type: "whole" }
+            ],
+            bassChord: ["D3", "F3", "A3", "D4"]
+          }
+        ]
+      },
+      blues: {
+        key: "A Minor Blues",
+        timeSig: "12/8",
+        tempo: 68,
+        tempoText: "Lento doloroso (Blues Shuffle) • ♩. = 68",
+        measures: [
+          {
+            number: 1,
+            chord: "Am7",
+            section: "SLOW BLUES",
+            notes: [
+              { pitch: "A4", duration: 1.5, yPos: 25, type: "dotted-quarter" },
+              { pitch: "C5", duration: 1.5, yPos: 15, type: "dotted-quarter" },
+              { pitch: "D5", duration: 1.0, yPos: 10, type: "quarter" },
+              { pitch: "Eb5", duration: 0.5, yPos: 5, type: "eighth" },
+              { pitch: "D5", duration: 1.5, yPos: 10, type: "dotted-quarter" }
+            ],
+            bassChord: ["A3", "C4", "E4", "G4"]
+          },
+          {
+            number: 2,
+            chord: "Dm7",
+            section: "",
+            notes: [
+              { pitch: "F4", duration: 1.5, yPos: 35, type: "dotted-quarter" },
+              { pitch: "A4", duration: 1.5, yPos: 25, type: "dotted-quarter" },
+              { pitch: "C5", duration: 1.5, yPos: 15, type: "dotted-quarter" },
+              { pitch: "D5", duration: 1.5, yPos: 10, type: "dotted-quarter" }
+            ],
+            bassChord: ["D3", "F3", "A3", "C4"]
+          },
+          {
+            number: 3,
+            chord: "E7#9",
+            section: "TURNAROUND",
+            notes: [
+              { pitch: "E5", duration: 1.5, yPos: 5, type: "dotted-quarter" },
+              { pitch: "G5", duration: 1.5, yPos: -5, type: "dotted-quarter" },
+              { pitch: "E5", duration: 1.5, yPos: 5, type: "dotted-quarter" },
+              { pitch: "D5", duration: 1.5, yPos: 10, type: "dotted-quarter" }
+            ],
+            bassChord: ["E3", "G#3", "D4", "G4"]
+          },
+          {
+            number: 4,
+            chord: "Am7",
+            section: "",
+            notes: [
+              { pitch: "A4", duration: 6.0, yPos: 25, type: "whole" }
+            ],
+            bassChord: ["A3", "C4", "E4", "A4"]
+          }
+        ]
+      },
+      hiphop: {
+        key: "F Minor / A♭ Major",
+        timeSig: "4/4",
+        tempo: 88,
+        tempoText: "Boom-Bap Heaviness • ♩ = 88",
+        measures: [
+          {
+            number: 1,
+            chord: "Fm7",
+            section: "BARS",
+            notes: [
+              { pitch: "F4", duration: 0.5, yPos: 35, type: "eighth" },
+              { pitch: "Ab4", duration: 0.5, yPos: 25, type: "eighth" },
+              { pitch: "C5", duration: 1.0, yPos: 15, type: "quarter" },
+              { pitch: "Bb4", duration: 1.0, yPos: 20, type: "quarter" },
+              { pitch: "Ab4", duration: 1.0, yPos: 25, type: "quarter" }
+            ],
+            bassChord: ["F3", "Ab3", "C4", "Eb4"]
+          },
+          {
+            number: 2,
+            chord: "Bbm7",
+            section: "",
+            notes: [
+              { pitch: "Db5", duration: 1.0, yPos: 15, type: "quarter" },
+              { pitch: "C5", duration: 1.0, yPos: 15, type: "quarter" },
+              { pitch: "Bb4", duration: 1.0, yPos: 20, type: "quarter" },
+              { pitch: "Ab4", duration: 1.0, yPos: 25, type: "quarter" }
+            ],
+            bassChord: ["Bb3", "Db4", "F4", "Ab4"]
+          },
+          {
+            number: 3,
+            chord: "C7alt",
+            section: "HOOK",
+            notes: [
+              { pitch: "G4", duration: 1.0, yPos: 30, type: "quarter" },
+              { pitch: "Bb4", duration: 1.0, yPos: 20, type: "quarter" },
+              { pitch: "Db5", duration: 1.0, yPos: 15, type: "quarter" },
+              { pitch: "C5", duration: 1.0, yPos: 15, type: "quarter" }
+            ],
+            bassChord: ["C3", "E3", "Bb3", "Db4"]
+          },
+          {
+            number: 4,
+            chord: "Fm",
+            section: "",
+            notes: [
+              { pitch: "F4", duration: 4.0, yPos: 35, type: "whole" }
+            ],
+            bassChord: ["F3", "Ab3", "C4", "F4"]
+          }
+        ]
+      },
+      rnb: {
+        key: "E♭ Major Soul",
+        timeSig: "4/4",
+        tempo: 76,
+        tempoText: "Soulful Ballad • ♩ = 76",
+        measures: [
+          {
+            number: 1,
+            chord: "Ebmaj9",
+            section: "VERSE",
+            notes: [
+              { pitch: "G4", duration: 1.0, yPos: 30, type: "quarter" },
+              { pitch: "Bb4", duration: 1.0, yPos: 20, type: "quarter" },
+              { pitch: "D5", duration: 1.0, yPos: 10, type: "quarter" },
+              { pitch: "C5", duration: 1.0, yPos: 15, type: "quarter" }
+            ],
+            bassChord: ["Eb3", "G3", "Bb3", "D4", "F4"]
+          },
+          {
+            number: 2,
+            chord: "Cm7",
+            section: "",
+            notes: [
+              { pitch: "Bb4", duration: 2.0, yPos: 20, type: "half" },
+              { pitch: "G4", duration: 1.0, yPos: 30, type: "quarter" },
+              { pitch: "Ab4", duration: 1.0, yPos: 25, type: "quarter" }
+            ],
+            bassChord: ["C3", "Eb3", "G3", "Bb3"]
+          },
+          {
+            number: 3,
+            chord: "Fm9",
+            section: "CHORUS",
+            notes: [
+              { pitch: "C5", duration: 1.0, yPos: 15, type: "quarter" },
+              { pitch: "Eb5", duration: 1.0, yPos: 5, type: "quarter" },
+              { pitch: "G5", duration: 1.0, yPos: -5, type: "quarter" },
+              { pitch: "F5", duration: 1.0, yPos: 0, type: "quarter" }
+            ],
+            bassChord: ["F3", "Ab3", "C4", "Eb4", "G4"]
+          },
+          {
+            number: 4,
+            chord: "Bb13",
+            section: "",
+            notes: [
+              { pitch: "Eb5", duration: 4.0, yPos: 5, type: "whole" }
+            ],
+            bassChord: ["Bb3", "D4", "Ab4", "C5", "G4"]
+          }
+        ]
+      },
+      ballad: {
+        key: "G Major Acoustic",
+        timeSig: "3/4",
+        tempo: 66,
+        tempoText: "Lento espressivo • ♩ = 66",
+        measures: [
+          {
+            number: 1,
+            chord: "G",
+            section: "FOLK ARPEGGIO",
+            notes: [
+              { pitch: "D4", duration: 1.0, yPos: 40, type: "quarter" },
+              { pitch: "G4", duration: 1.0, yPos: 30, type: "quarter" },
+              { pitch: "B4", duration: 1.0, yPos: 20, type: "quarter" }
+            ],
+            bassChord: ["G3", "B3", "D4", "G4"]
+          },
+          {
+            number: 2,
+            chord: "Em7",
+            section: "",
+            notes: [
+              { pitch: "E4", duration: 2.0, yPos: 40, type: "half" },
+              { pitch: "G4", duration: 1.0, yPos: 30, type: "quarter" }
+            ],
+            bassChord: ["E3", "G3", "B3", "D4"]
+          },
+          {
+            number: 3,
+            chord: "Cadd9",
+            section: "REFRAIN",
+            notes: [
+              { pitch: "C5", duration: 1.0, yPos: 15, type: "quarter" },
+              { pitch: "B4", duration: 1.0, yPos: 20, type: "quarter" },
+              { pitch: "A4", duration: 1.0, yPos: 25, type: "quarter" }
+            ],
+            bassChord: ["C3", "E3", "G3", "D4"]
+          },
+          {
+            number: 4,
+            chord: "D",
+            section: "",
+            notes: [
+              { pitch: "G4", duration: 3.0, yPos: 30, type: "whole" }
+            ],
+            bassChord: ["D3", "F#3", "A3", "D4"]
+          }
+        ]
+      }
+    };
+
+    /* ========================================================================= */
+    /* 3. LYRIC & STYLE DRAFTING (OFFLINE ENGINE)                                */
+    /* ========================================================================= */
+    function article(word) {
+      return /^[aeiou]/i.test(word) ? "an" : "a";
+    }
+
+    function memoryLines(text) {
+      const sentences = String(text || "")
+        .replace(/\s+/g, " ")
+        .split(/(?<=[.!?])\s+/)
+        .map(s => s.trim())
+        .filter(s => wordCount(s) >= 3);
+      return sentences.slice(0, 3).map(s => {
+        const words = s.split(" ");
+        let line = words.length > 12 ? words.slice(0, 12).join(" ") : s;
+        line = line.replace(/[.!?;:,]+$/, "");
+        return line + ",";
+      });
+    }
+
+    function buildLyrics(p) {
+      const lc = s => String(s || "").toLowerCase();
+      const name = p.nickname || p.name || "you";
+      const place = p.location || "the place we called home";
+      const w1 = lc(p.wounds[0]) || "pain";
+      const w2 = lc(p.wounds[1]) || w1;
+      const g1 = lc(p.gifts[0]) || "grace";
+      const g2 = lc(p.gifts[1]) || "strength";
+      const s1 = lc(p.symbols[0]) || "old photograph";
+      const s2 = lc(p.symbols[1]) || "empty chair";
+      const s3 = lc(p.symbols[2]) || s1;
+      const arc = p.arc.length ? p.arc : ["Loss", "Rise"];
+      const a0 = arc[0];
+      const aN = arc[arc.length - 1];
+      const arch = lc(p.archetype);
+      const mem = memoryLines(p.rawMemory);
+      const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+      const chorus = [
+        `Oh, the ${w1} cut deep, but it gave us ${g1},`,
+        `${name}, you turned the hurt into a song.`,
+        `Nobody gets forgotten while we still sing,`,
+        `${a0} gave way to ${aN}, and we remember everything.`
+      ].join("\n");
+
+      return `[Intro - ${GENRE_LABELS[p.genre] || "Instrumental"}]
+(${cap(s1)} motif, quiet and close)
+
+[Verse 1 - The Scene]
+Down in ${place}, where the story starts,
+${name} carried more than a single heart.
+${mem[0] || "Some memories don't fade, they just wait to be told,"}
+${mem[1] || "and this one's been waiting since the days turned cold."}
+There's ${article(s1)} ${s1} that still remembers,
+every season, every ember.
+
+[Chorus - The Truth: ${cap(w1)} & ${cap(g1)}]
+${chorus}
+
+[Verse 2 - The Turning Point]
+Years went by like pages turning slow,
+the ${s2} still there for the ones who know.
+${mem[2] || `You fought through the ${w2} when nobody saw,`}
+${arch ? `they called you ${article(arch)} ${arch}, and they meant it all.` : "and you stood your ground through it all."}
+And when the ${w2} came knocking at the door,
+you answered with ${g2} and gave a little more.
+
+[Bridge - The Shift]
+(The arrangement opens wide)
+Don't you dare reduce a life down to its scars,
+the ${w1} was the doorway, the ${g1} is who you are.
+From ${lc(a0)} to ${lc(aN)}, from the ground up to the sky,
+some stories are too true to ever die.
+
+[Chorus - Reprise]
+${chorus}
+
+[Outro - The Legacy Echo]
+(Stripped down, ${s3} in the silence)
+${place}...
+We still say your name, ${name}.
+Told by ${p.voice || "The Family"}:
+Nobody gets forgotten.
+[Fade to silence]`;
+    }
+
+    function buildStyle(p) {
+      const arc = p.arc.length ? p.arc : ["Loss", "Rise"];
+      let style = GENRE_STYLES[p.genre] || GENRE_STYLES.bolero;
+      style += `, emotional arc ${arc.join(" to ").toLowerCase()}`;
+      if (p.voice) style += `, told in the voice of ${p.voice.toLowerCase()}`;
+      return style;
+    }
+
+    function getLyrics(p) { return p.lyrics || buildLyrics(p); }
+    function getStyle(p) { return p.style || buildStyle(p); }
+
+    function getSheetWords(p, needed) {
+      const words = getLyrics(p)
+        .split("\n")
+        .map(l => l.trim())
+        .filter(l => l && !l.startsWith("[") && !l.startsWith("("))
+        .join(" ")
+        .split(/\s+/)
+        .map(w => w.replace(/^[^\p{L}\p{N}']+|[^\p{L}\p{N}'!?,.]+$/gu, ""))
+        .filter(Boolean);
+      if (!words.length) return [];
+      const out = [];
+      for (let i = 0; i < needed; i++) out.push(words[i % words.length]);
+      return out;
+    }
+
+    /* ========================================================================= */
+    /* 4. ENGRAVED SVG LEAD SHEET GENERATOR                                      */
+    /* ========================================================================= */
+    function renderEngravedLeadSheet() {
+      const container = $("sheet-svg-container");
+      const p = getActivePerson();
+      if (!container || !p) return;
+
+      const genre = currentGenre();
+      const genreData = MELODIES[genre];
+      const measures = genreData.measures;
+      const totalMeasures = measures.length;
+      const totalNotes = measures.reduce((n, m) => n + m.notes.length, 0);
+      const words = getSheetWords(p, totalNotes);
+      const arc = p.arc.length ? p.arc : ["Loss", "Rise"];
+
+      const genreSelect = $("lead-genre-select");
+      if (genreSelect) genreSelect.value = genre;
+      $("sheet-song-title").textContent = displayTitle(p).toUpperCase();
+      $("sheet-song-subtitle").textContent = `Lead Sheet & Harmonic Blueprint • From the Living Memory of ${p.name}`;
+      $("sheet-tempo-text").textContent = genreData.tempoText;
+      $("sheet-key-text").textContent = genreData.key;
+      $("sheet-arc-text").textContent = arc.join(" → ");
+      $("sheet-voice-text").textContent = p.voice || "The Family";
+      $("sheet-harmonic-analysis").textContent = `${HARMONIC_NOTES[genre]} The ${arc.join(" → ")} arc sets the direction: minor colors for loss and struggle, major lift for love and rising.`;
+      $("sheet-syllable-analysis").textContent = words.length
+        ? `Lyrics are set one word per note from the opening of ${p.name}'s song: "${words.join(" ")}". Edit the lyrics in the Song tab and the lead sheet follows.`
+        : "Add lyrics in the Song tab to set words under the melody.";
+
+      const measuresPerSystem = 4;
+      const systemsCount = Math.ceil(totalMeasures / measuresPerSystem);
+      const systemHeight = 160;
+      const totalHeight = systemsCount * systemHeight + 60;
+      const svgWidth = 980;
+
+      let svgHtml = `<svg width="100%" height="${totalHeight}" viewBox="0 0 ${svgWidth} ${totalHeight}" xmlns="http://www.w3.org/2000/svg" style="background:#fffdfa; font-family:'Inter', sans-serif; min-width:640px;">
+        <defs>
+          <filter id="note-shadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="1" stdDeviation="0.5" flood-color="#14213d" flood-opacity="0.15"/>
+          </filter>
+        </defs>`;
+
+      let globalNoteCounter = 0;
+
+      for (let sys = 0; sys < systemsCount; sys++) {
+        const sysY = 50 + sys * systemHeight;
+        const startMeasureIdx = sys * measuresPerSystem;
+        const sysMeasures = measures.slice(startMeasureIdx, Math.min(startMeasureIdx + measuresPerSystem, totalMeasures));
+        const staffLeft = 50;
+        const staffRight = svgWidth - 40;
+        const measureWidth = (staffRight - staffLeft) / sysMeasures.length;
+
+        for (let l = 0; l < 5; l++) {
+          const ly = sysY + l * 10;
+          svgHtml += `<line x1="${staffLeft}" y1="${ly}" x2="${staffRight}" y2="${ly}" stroke="#1c1f26" stroke-width="1.2" />`;
+        }
+
+        svgHtml += renderTrebleClef(staffLeft + 10, sysY + 30);
+
+        if (sys === 0) {
+          const [timeTop, timeBot] = genreData.timeSig.split("/");
+          svgHtml += `<text x="${staffLeft + 42}" y="${sysY + 18}" font-family="'Libre Caslon Text', serif" font-size="20" font-weight="700" fill="#1c1f26" text-anchor="middle">${timeTop || 4}</text>`;
+          svgHtml += `<text x="${staffLeft + 42}" y="${sysY + 38}" font-family="'Libre Caslon Text', serif" font-size="20" font-weight="700" fill="#1c1f26" text-anchor="middle">${timeBot || 4}</text>`;
+        }
+
+        sysMeasures.forEach((measure, mIdx) => {
+          const mX = staffLeft + mIdx * measureWidth;
+          const nextMX = mX + measureWidth;
+          const usableStartX = mIdx === 0 ? (sys === 0 ? mX + 65 : mX + 45) : mX + 15;
+          const usableWidth = (nextMX - 15) - usableStartX;
+
+          if (mIdx > 0) {
+            svgHtml += `<line x1="${mX}" y1="${sysY}" x2="${mX}" y2="${sysY + 40}" stroke="#1c1f26" stroke-width="1.2" />`;
+          }
+
+          if (measure.section) {
+            svgHtml += `<rect x="${mX}" y="${sysY - 42}" width="${measure.section.length * 8 + 14}" height="18" fill="#14213d" rx="2" />`;
+            svgHtml += `<text x="${mX + 7}" y="${sysY - 29}" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="600" fill="#f7f4ec">${esc(measure.section)}</text>`;
+          }
+
+          if (measure.chord) {
+            svgHtml += `<text x="${mX + 8}" y="${sysY - 12}" font-family="'Inter', sans-serif" font-size="15" font-weight="700" fill="#8a6a35">${esc(measure.chord)}</text>`;
+          }
+
+          const noteSpacing = usableWidth / Math.max(measure.notes.length, 1);
+
+          measure.notes.forEach((note, nIdx) => {
+            const noteX = usableStartX + nIdx * noteSpacing + noteSpacing * 0.4;
+            const noteY = sysY + note.yPos;
+            const wordIdx = globalNoteCounter;
+            const noteId = `lead-note-${globalNoteCounter++}`;
+
+            if (note.yPos >= 50) {
+              svgHtml += `<line x1="${noteX - 10}" y1="${sysY + 50}" x2="${noteX + 10}" y2="${sysY + 50}" stroke="#1c1f26" stroke-width="1.2" />`;
+            }
+            if (note.yPos <= -10) {
+              svgHtml += `<line x1="${noteX - 10}" y1="${sysY - 10}" x2="${noteX + 10}" y2="${sysY - 10}" stroke="#1c1f26" stroke-width="1.2" />`;
+            }
+
+            const isHollow = (note.type === "half" || note.type === "whole");
+            if (isHollow) {
+              svgHtml += `<ellipse id="${noteId}-head" cx="${noteX}" cy="${noteY}" rx="6" ry="4.5" transform="rotate(-25, ${noteX}, ${noteY})" fill="none" stroke="#1c1f26" stroke-width="2" class="lead-note-head" />`;
+            } else {
+              svgHtml += `<ellipse id="${noteId}-head" cx="${noteX}" cy="${noteY}" rx="6" ry="4.5" transform="rotate(-25, ${noteX}, ${noteY})" fill="#1c1f26" class="lead-note-head" />`;
+            }
+
+            if (note.type !== "whole") {
+              const stemUp = (note.yPos >= 20);
+              const stemX = stemUp ? noteX + 5.5 : noteX - 5.5;
+              const stemYEnd = stemUp ? noteY - 32 : noteY + 32;
+              svgHtml += `<line x1="${stemX}" y1="${noteY}" x2="${stemX}" y2="${stemYEnd}" stroke="#1c1f26" stroke-width="1.5" />`;
+              if (note.type === "eighth") {
+                svgHtml += `<path d="M ${stemX} ${stemYEnd} C ${stemX + 8} ${stemYEnd + 8}, ${stemX + 10} ${stemYEnd + 16}, ${stemX + 6} ${stemYEnd + 22}" fill="none" stroke="#1c1f26" stroke-width="1.8" />`;
+              }
+            }
+
+            if (note.type === "dotted-quarter") {
+              svgHtml += `<circle cx="${noteX + 10}" cy="${noteY - 2}" r="2" fill="#1c1f26" />`;
+            }
+
+            const word = words[wordIdx];
+            if (word) {
+              const fs = Math.max(8, Math.min(12, Math.floor(noteSpacing * 1.8 / Math.max(word.length, 1))));
+              svgHtml += `<text id="${noteId}-syllable" x="${noteX}" y="${sysY + 74}" font-family="'Inter', sans-serif" font-size="${fs}" font-weight="500" fill="#1c1f26" text-anchor="middle" class="lead-syllable">${esc(word)}</text>`;
+            }
+          });
+        });
+
+        if (sys === systemsCount - 1) {
+          svgHtml += `<line x1="${staffRight - 4}" y1="${sysY}" x2="${staffRight - 4}" y2="${sysY + 40}" stroke="#1c1f26" stroke-width="1.5" />`;
+          svgHtml += `<line x1="${staffRight}" y1="${sysY}" x2="${staffRight}" y2="${sysY + 40}" stroke="#1c1f26" stroke-width="3.5" />`;
+        } else {
+          svgHtml += `<line x1="${staffRight}" y1="${sysY}" x2="${staffRight}" y2="${sysY + 40}" stroke="#1c1f26" stroke-width="1.5" />`;
+        }
+      }
+
+      svgHtml += `</svg>`;
+      container.innerHTML = svgHtml;
+    }
+
+    // Accurate Vector Treble Clef Path generator
+    function renderTrebleClef(x, y) {
+      return `<g transform="translate(${x - 8}, ${y - 32}) scale(0.65)" fill="#1c1f26">
+        <path d="M16.5 45.2c-.8-1.5-.7-3.3.3-4.6 1.4-1.9 3.9-2.5 6-1.5 2.1 1 3.2 3.3 2.7 5.6-.4 1.9-1.9 3.5-3.8 3.9v2.1c4.8-.4 8.7-4.1 9-8.9.3-5-3.1-9.5-7.9-10.4l.7-4.1c3.8 2.2 8.7 1.2 11.2-2.5 2.4-3.5 1.7-8.3-1.6-11-2.9-2.4-7.2-2.4-10.1-.1-2.9 2.3-4.2 6.1-3.3 9.7l-.8 4.7c-4.4.9-7.9 4.3-8.8 8.6-1.1 5.3 1.7 10.7 6.6 12.8v1.8c-3.1 1.1-5.1 4.2-4.7 7.5.4 3.4 3.1 6.1 6.5 6.5 4.1.5 7.9-2.2 8.8-6.2.7-3.2-.8-6.5-3.7-7.9l.4-2.6c1.1.2 2.2.3 3.3.3 4.3 0 8.3-2.1 10.6-5.6l-2-1.3c-1.8 2.8-5 4.5-8.3 4.5-1 0-1.9-.2-2.9-.5l2.4-14.8c1.7.5 3.5.7 5.2.5 3.6-.4 6.7-2.6 8.2-5.9 1.5-3.3.9-7.2-1.4-9.9-2.2-2.5-5.7-3.5-8.9-2.6-3.2.9-5.5 3.5-5.9 6.8l-3.3 20.3c-3.3-1.5-5.2-4.9-4.7-8.6.5-3.5 3.1-6.3 6.6-7.1l.8-4.8c-5.2 1-9.2 5.2-9.8 10.4-.7 5.6 2.3 10.9 7.3 13.2l-2.4 14.8c-2.4-.7-4.2-2.7-4.6-5.2-.4-2.4.7-4.8 2.8-6.1l-1.3-2.2zM24 23.4c-.1-2.1 1.2-4.1 3.2-4.8 2-.7 4.2-.1 5.6 1.5 1.4 1.6 1.8 4 .9 6-1 2-2.9 3.3-5.1 3.6l1.2-7.5c-.3 0-.6.1-.9.1-1.8 0-3.6-.8-4.9-2.1v3.2z"/>
+      </g>`;
+    }
+
+    /* ========================================================================= */
+    /* 5. WEB AUDIO SYNTHESIZER & REAL-TIME AUDITION ENGINE                      */
+    /* ========================================================================= */
+    function initAudioContext() {
+      if (!audioCtx) {
+        const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtxClass) {
+          audioCtx = new AudioCtxClass();
+        }
+      }
+      if (audioCtx && audioCtx.state === "suspended") {
+        audioCtx.resume();
+      }
+    }
+
+    function toggleAudioPlayback() {
+      if (isPlayingAudio) {
+        stopAudioPlayback();
+      } else {
+        startAudioPlayback();
+      }
+    }
+
+    function startAudioPlayback() {
+      initAudioContext();
+      if (!audioCtx) {
+        showToast("This browser can't play audio.");
+        return;
+      }
+
+      isPlayingAudio = true;
+      currentNoteIndex = 0;
+
+      const playBtnText = document.getElementById("audio-play-text");
+      const playIcon = document.getElementById("audio-play-icon");
+      if (playBtnText) playBtnText.textContent = "Pause Audition";
+      if (playIcon) playIcon.setAttribute("data-lucide", "pause");
+      if (window.lucide) window.lucide.createIcons();
+
+      const statusLabel = document.getElementById("audio-status-label");
+      if (statusLabel) statusLabel.textContent = `Auditioning Lead Sheet • ${(GENRE_LABELS[currentGenre()] || "").toUpperCase()}`;
+
+      // Flatten notes sequence with measure context
+      const genreData = MELODIES[currentGenre()] || MELODIES.bolero;
+      const flatNotes = [];
+      let totalDuration = 0;
+
+      genreData.measures.forEach((m, mIdx) => {
+        m.notes.forEach((n, nIdx) => {
+          flatNotes.push({
+            ...n,
+            measureChord: m.chord,
+            bassChord: m.bassChord,
+            measureIndex: mIdx,
+            noteGlobalIdx: flatNotes.length
+          });
+          totalDuration += n.duration;
+        });
+      });
+
+      // Play through note schedule
+      schedulePlaybackStep(flatNotes, 0);
+    }
+
+    function schedulePlaybackStep(noteSequence, index) {
+      if (!isPlayingAudio || index >= noteSequence.length) {
+        stopAudioPlayback();
+        return;
+      }
+
+      const note = noteSequence[index];
+      const secondsPerBeat = 60 / currentTempoBpm;
+      const noteDurationSec = note.duration * secondsPerBeat;
+
+      // Play synthesized audio voice
+      playSynthesizedVoice(note.pitch, noteDurationSec, note.bassChord);
+
+      // Highlight visual element on lead sheet
+      highlightLeadSheetNote(note.noteGlobalIdx, index, noteSequence.length);
+
+      // Schedule next note
+      playbackTimer = setTimeout(() => {
+        if (isPlayingAudio) {
+          schedulePlaybackStep(noteSequence, index + 1);
+        }
+      }, noteDurationSec * 1000);
+    }
+
+    function playSynthesizedVoice(pitchStr, durationSec, bassChord) {
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      const freq = NOTE_FREQS[pitchStr] || 440;
+
+      // Lead Melody Voice
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      const filter = audioCtx.createBiquadFilter();
+
+      // Configure timbre
+      if (currentInstrument === "piano") {
+        osc.type = "triangle";
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(2200, now);
+        filter.frequency.exponentialRampToValueAtTime(400, now + durationSec);
+      } else if (currentInstrument === "rhodes") {
+        osc.type = "sine";
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(1400, now);
+      } else if (currentInstrument === "guitar") {
+        osc.type = "sawtooth";
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(1800, now);
+        filter.frequency.exponentialRampToValueAtTime(200, now + durationSec * 0.8);
+      } else if (currentInstrument === "brass") {
+        osc.type = "sawtooth";
+        filter.type = "bandpass";
+        filter.frequency.setValueAtTime(900, now);
+      }
+
+      osc.frequency.setValueAtTime(freq, now);
+
+      // ADSR Envelope
+      gainNode.gain.setValueAtTime(0.001, now);
+      gainNode.gain.linearRampToValueAtTime(0.35, now + 0.02);
+      gainNode.gain.exponentialRampToValueAtTime(0.18, now + Math.min(0.2, durationSec * 0.5));
+      gainNode.gain.exponentialRampToValueAtTime(0.001, now + durationSec);
+
+      osc.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      osc.start(now);
+      osc.stop(now + durationSec + 0.05);
+
+      // Background chord pad voice if bassChord present
+      if (bassChord && Array.isArray(bassChord)) {
+        bassChord.forEach((bPitch) => {
+          const bFreq = NOTE_FREQS[bPitch];
+          if (!bFreq) return;
+          const bOsc = audioCtx.createOscillator();
+          const bGain = audioCtx.createGain();
+          bOsc.type = "triangle";
+          bOsc.frequency.setValueAtTime(bFreq, now);
+
+          bGain.gain.setValueAtTime(0.001, now);
+          bGain.gain.linearRampToValueAtTime(0.06, now + 0.05);
+          bGain.gain.exponentialRampToValueAtTime(0.001, now + durationSec * 1.2);
+
+          bOsc.connect(bGain);
+          bGain.connect(audioCtx.destination);
+          bOsc.start(now);
+          bOsc.stop(now + durationSec * 1.25);
+        });
+      }
+    }
+
+    function highlightLeadSheetNote(globalIdx, currentIdx, totalNotes) {
+      // Clear previous note highlights
+      document.querySelectorAll(".lead-note-head").forEach(el => {
+        if (el.tagName === "ellipse") {
+          const isHollow = el.getAttribute("fill") === "none";
+          el.setAttribute(isHollow ? "stroke" : "fill", "#1c1f26");
+        }
+      });
+      document.querySelectorAll(".lead-syllable").forEach(el => {
+        el.setAttribute("fill", "#1c1f26");
+        el.setAttribute("font-weight", "500");
+      });
+
+      // Highlight active note
+      const activeHead = document.getElementById(`lead-note-${globalIdx}-head`);
+      const activeSyllable = document.getElementById(`lead-note-${globalIdx}-syllable`);
+
+      if (activeHead) {
+        const isHollow = activeHead.getAttribute("fill") === "none";
+        activeHead.setAttribute(isHollow ? "stroke" : "fill", "#b08d57");
+        activeHead.setAttribute("filter", "url(#note-shadow)");
+      }
+      if (activeSyllable) {
+        activeSyllable.setAttribute("fill", "#14213d");
+        activeSyllable.setAttribute("font-weight", "700");
+      }
+
+      // Update progress bar
+      const progressPercent = ((currentIdx + 1) / totalNotes) * 100;
+      const progressBar = document.getElementById("audio-progress-bar");
+      if (progressBar) progressBar.style.width = `${progressPercent}%`;
+
+      const timeLabel = document.getElementById("audio-time-label");
+      if (timeLabel) timeLabel.textContent = `Note ${currentIdx + 1} of ${totalNotes}`;
+    }
+
+    function stopAudioPlayback() {
+      isPlayingAudio = false;
+      if (playbackTimer) {
+        clearTimeout(playbackTimer);
+        playbackTimer = null;
+      }
+
+      const playBtnText = document.getElementById("audio-play-text");
+      const playIcon = document.getElementById("audio-play-icon");
+      if (playBtnText) playBtnText.textContent = "Audition Lead Sheet";
+      if (playIcon) playIcon.setAttribute("data-lucide", "play");
+      if (window.lucide) window.lucide.createIcons();
+
+      const statusLabel = document.getElementById("audio-status-label");
+      if (statusLabel) statusLabel.textContent = "Synthesizer Idle • Ready to Play";
+
+      const progressBar = document.getElementById("audio-progress-bar");
+      if (progressBar) progressBar.style.width = "0%";
+
+      // Reset note highlights
+      document.querySelectorAll(".lead-note-head").forEach(el => {
+        const isHollow = el.getAttribute("fill") === "none";
+        el.setAttribute(isHollow ? "stroke" : "fill", "#1c1f26");
+      });
+      document.querySelectorAll(".lead-syllable").forEach(el => {
+        el.setAttribute("fill", "#1c1f26");
+        el.setAttribute("font-weight", "500");
+      });
+    }
+
+    function onTempoSliderChange(val) {
+      currentTempoBpm = parseInt(val, 10);
+      const valElem = document.getElementById("audio-tempo-val");
+      if (valElem) valElem.textContent = `${currentTempoBpm} BPM`;
+    }
+
+    function onInstrumentChanged(val) {
+      currentInstrument = val;
+    }
+
+    function onGenreChanged(val) {
+      const p = getActivePerson();
+      if (!p || !MELODIES[val]) return;
+      stopAudioPlayback();
+      p.genre = val;
+      touch(p);
+      syncTempoToGenre();
+      renderEngravedLeadSheet();
+      if (currentTab === "suno") renderSuno();
+    }
+
+    function syncTempoToGenre() {
+      currentTempoBpm = MELODIES[currentGenre()].tempo;
+      const slider = $("audio-tempo-slider");
+      if (slider) slider.value = currentTempoBpm;
+      const label = $("audio-tempo-val");
+      if (label) label.textContent = `${currentTempoBpm} BPM`;
+    }
+
+    function printLeadSheet() { window.print(); }
+    function regenerateLeadSheet() { renderEngravedLeadSheet(); showToast("Lead sheet re-engraved."); }
+
+    /* ========================================================================= */
+    /* 6. MYTH EXTRACTION ENGINE (Wounds, Gifts, Symbols, Arc)                   */
+    /* ========================================================================= */
+    const WOUND_KEYWORDS = {
+      Pain: ["pain", "hurt", "burn", "injur", "scar", "wound", "bled", "bleed"],
+      Trust: ["trust", "lied", "lying", "cheat", "broken promise"],
+      Loss: ["loss", "lost", "died", "death", "passed away", "funeral", "grief", "grieve", "buried", "killed"],
+      War: ["war", "soldier", "army", "navy", "marine", "combat", "battle", "deploy", "veteran", "vietnam", "korea", "iraq", "afghanistan"],
+      Addiction: ["addict", "drug", "alcohol", "drinking", "drunk", "heroin", "needle", "sober", "relapse", "pills"],
+      Loneliness: ["alone", "lonely", "isolat", "nobody visited", "by himself", "by herself"],
+      Disappointment: ["disappoint", "let down", "failed", "rejected", "never made it"],
+      Shame: ["shame", "ashamed", "embarrass", "guilt", "humiliat"],
+      Fear: ["fear", "afraid", "scared", "terrif", "panic"],
+      Abandonment: ["abandon", "left us", "walked out", "orphan", "left behind", "never came back"],
+      Identity: ["identity", "who i am", "who he was", "who she was", "belong", "immigra", "accent", "two worlds"],
+      Betrayal: ["betray", "stole", "corrupt", "backstab", "turned on"]
+    };
+
+    const GIFT_KEYWORDS = {
+      Community: ["community", "neighbo", "block", "everyone", "the people", "town", "village", "parish"],
+      Wisdom: ["wise", "wisdom", "taught", "lesson", "advice", "learned"],
+      Family: ["family", "mother", "father", "mom", "dad", "son", "daughter", "grand", "kids", "children", "brother", "sister", "uncle", "aunt", "cousin"],
+      Humor: ["laugh", "joke", "funny", "humor", "smile"],
+      Faith: ["faith", "pray", "church", "god", "believe", "rosary", "temple", "mosque"],
+      Resilience: ["kept going", "never gave up", "overcame", "endur", "strong", "got back up", "rebuilt"],
+      Survival: ["surviv", "escape", "made it", "lived through"],
+      Legacy: ["legacy", "remember", "generation", "passed down", "heirloom"],
+      Creativity: ["creat", "built", "art", "music", "paint", "wrote", "sang", "design", "cook"],
+      Redemption: ["redeem", "redemption", "forgave", "forgive", "second chance", "saved", "rescued", "turned his life", "turned her life"],
+      Love: ["love", "loved", "care", "kind", "tender", "hug"],
+      Leadership: ["lead", "led ", "organiz", "stood up", "refused", "spoke up", "in charge"]
+    };
+
+    function textHas(text, needle) {
+      return text.indexOf(needle.toLowerCase()) !== -1;
+    }
+
+    async function runOneClickStoryIntake() {
+      const p = getActivePerson();
+      if (!p) return;
+      if (aiBusy) return;
+      if (aiEnabled() && p.rawMemory.trim()) {
+        const handled = await aiExtract();
+        if (handled) return;
+      }
+      const text = " " + String(p.rawMemory || "").toLowerCase() + " ";
+      if (!p.rawMemory.trim()) {
+        showToast("Write a memory first, then extract.");
+        $("raw-memory-input")?.focus();
+        return;
+      }
+
+      const detect = (keywordMap, lexiconList) => {
+        const found = [];
+        Object.keys(keywordMap).forEach(k => { if (keywordMap[k].some(w => textHas(text, w))) found.push(k); });
+        lexiconList.forEach(k => { if (!keywordMap[k] && textHas(text, k)) found.push(k); });
+        return uniq(found);
+      };
+
+      const wounds = detect(WOUND_KEYWORDS, appState.lexicon.wounds);
+      const gifts = detect(GIFT_KEYWORDS, appState.lexicon.gifts);
+      const symbols = appState.lexicon.symbols.filter(s => textHas(text, s));
+
+      if (wounds.length) p.wounds = wounds;
+      if (gifts.length) p.gifts = gifts;
+      p.symbols = uniq(p.symbols.concat(symbols));
+
+      const hasLoss = wounds.includes("Loss") || wounds.includes("Abandonment");
+      const hasFight = /\b(fought|fight|fighting|battle|struggl|stood up|refused|resist)/.test(text) || wounds.includes("War");
+      const hasFall = /\b(fell|fall|relapse|broke down|lost everything|hit bottom|rock bottom)/.test(text) || wounds.includes("Addiction");
+      const hasLove = gifts.includes("Love") || gifts.includes("Family");
+      let arc = null;
+      if (hasLove && hasLoss) arc = ["Love", "Loss", "Rise"];
+      else if (hasLoss && hasFight) arc = ["Loss", "Fight", "Rise"];
+      else if (hasFight && hasFall) arc = ["Fight", "Fall", "Rise"];
+      else if (hasLoss) arc = ["Loss", "Rise"];
+      else if (hasFight) arc = ["Fight", "Rise"];
+      else if (hasLove) arc = ["Love", "Rise"];
+      if (arc) p.arc = arc;
+
+      touch(p);
+      renderIntake();
+      renderStats();
+
+      const total = wounds.length + gifts.length + symbols.length;
+      if (total === 0) {
+        showToast("No clear keywords found. Tap the tags below to choose them yourself.", 4500);
+      } else {
+        showToast(`Found ${wounds.length} wound${wounds.length === 1 ? "" : "s"}, ${gifts.length} gift${gifts.length === 1 ? "" : "s"}, ${symbols.length} symbol${symbols.length === 1 ? "" : "s"}. Adjust the tags to fit.`, 4500);
+      }
+
+      const btn = $("btn-extract");
+      if (btn) {
+        btn.innerHTML = `<i data-lucide="check" style="width:14px; height:14px;"></i><span>Extracted!</span>`;
+        refreshIcons();
+        setTimeout(() => {
+          btn.innerHTML = `<i data-lucide="zap" style="width:14px; height:14px;"></i><span>One-Click Story Intake / Extract</span>`;
+          refreshIcons();
+        }, 1800);
+      }
+    }
+
+    function renderLexiconTags() {
+      const p = getActivePerson();
+      if (!p) return;
+      ["wounds", "gifts", "symbols"].forEach(kind => {
+        const container = $(`${kind}-container`);
+        if (!container) return;
+        const pool = uniq(appState.lexicon[kind].concat(p[kind]));
+        const cls = kind === "wounds" ? "wound" : (kind === "gifts" ? "gift" : "");
+        container.innerHTML = pool.map(item => {
+          const selected = p[kind].includes(item);
+          return `<button type="button" class="stamp-tag ${cls} ${selected ? "selected" : ""}" aria-pressed="${selected}" data-action="toggle-tag" data-kind="${kind}" data-value="${esc(item)}">${esc(item)}</button>`;
+        }).join("");
+      });
+    }
+
+    function toggleTag(kind, value) {
+      const p = getActivePerson();
+      if (!p || !Array.isArray(p[kind])) return;
+      const idx = p[kind].indexOf(value);
+      if (idx > -1) p[kind].splice(idx, 1);
+      else p[kind].push(value);
+      touch(p);
+      renderLexiconTags();
+      renderPersonCard();
+    }
+
+    function addArcStep(lane) {
+      const p = getActivePerson();
+      if (!p) return;
+      if (p.arc.length >= 4) p.arc = [];
+      p.arc.push(lane);
+      touch(p);
+      renderArcDisplay();
+      renderPersonCard();
+      renderStats();
+    }
+
+    function clearArcSequence() {
+      const p = getActivePerson();
+      if (!p) return;
+      p.arc = [];
+      touch(p);
+      renderArcDisplay();
+      renderPersonCard();
+      renderStats();
+    }
+
+    function setArcPreset(steps) {
+      const p = getActivePerson();
+      if (!p) return;
+      p.arc = steps.slice(0, 4);
+      touch(p);
+      renderArcDisplay();
+      renderPersonCard();
+      renderStats();
+    }
+
+    function renderArcDisplay() {
+      const container = $("arc-sequence-display");
+      const p = getActivePerson();
+      if (!container || !p) return;
+      if (!p.arc.length) {
+        container.innerHTML = `<span style="font-size:0.8125rem; color:var(--on-surface-variant);">No trajectory yet. Click the lanes below, or run One-Click Extract.</span>`;
+        return;
+      }
+      let html = `<span style="font-size:0.8125rem; color:var(--on-surface-variant);">Active Trajectory:</span>`;
+      p.arc.forEach((step, idx) => {
+        const v = ARC_VECTORS[step].map(n => (n > 0 ? "+" : "") + n.toFixed(1)).join(", ");
+        html += `<span class="arc-step-pill">${idx + 1}. ${esc(step)} <span style="opacity:0.6;">(${v})</span></span>`;
+        if (idx < p.arc.length - 1) html += `<i data-lucide="arrow-right" style="width:14px; height:14px; color:var(--outline);"></i>`;
+      });
+      container.innerHTML = html;
+      refreshIcons();
+    }
+
+    /* ========================================================================= */
+    /* 7. SONG PIPELINE                                                          */
+    /* ========================================================================= */
+    function renderSuno() {
+      const p = getActivePerson();
+      if (!p) return;
+      const lyricsEl = $("suno-lyrics-output");
+      const styleEl = $("suno-style-output");
+      if (lyricsEl && document.activeElement !== lyricsEl) lyricsEl.value = getLyrics(p);
+      if (styleEl && document.activeElement !== styleEl) styleEl.value = getStyle(p);
+      const titleEl = $("suno-song-title-input");
+      if (titleEl && document.activeElement !== titleEl) {
+        titleEl.value = p.songTitle;
+        titleEl.placeholder = `The Ballad of ${p.nickname || p.name}`;
+      }
+      const proseEl = $("prose-output");
+      if (proseEl && document.activeElement !== proseEl) proseEl.value = p.prose;
+      const albumEl = $("suno-album-input");
+      if (albumEl && document.activeElement !== albumEl) albumEl.value = p.album;
+      const arc = p.arc.length ? p.arc.join(" → ") : "not set";
+      $("suno-formula-display").textContent = `Arc: ${arc} | Wounds: [${p.wounds.join(", ") || "none"}] | Gifts: [${p.gifts.join(", ") || "none"}] | Symbols: [${p.symbols.join(", ") || "none"}]`;
+      $("lyrics-edited-badge").style.display = p.lyrics ? "" : "none";
+      $("style-edited-badge").style.display = p.style ? "" : "none";
+    }
+
+    function regenerateSunoLyrics(force) {
+      const p = getActivePerson();
+      if (!p) return;
+      if (force) {
+        if ((p.lyrics || p.style) && !confirm("Replace your edited lyrics and style with a fresh draft from this character's record?")) return;
+        p.lyrics = "";
+        p.style = "";
+        touch(p);
+        showToast("Fresh draft generated.");
+      }
+      renderSuno();
+    }
+
+    function copyText(text, okMessage) {
+      const fallback = () => {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); showToast(okMessage); }
+        catch (e) { showToast("Couldn't copy automatically. Select the text and copy it."); }
+        ta.remove();
+      };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => showToast(okMessage)).catch(fallback);
+      } else {
+        fallback();
+      }
+    }
+
+    function copyToClipboard(elementId) {
+      const elem = $(elementId);
+      if (elem) copyText(elem.value, "Copied to clipboard.");
+    }
+
+    function copyFullSunoPackage() {
+      const p = getActivePerson();
+      if (!p) return;
+      const pkg = `=== SONG PROMPT PACKAGE ===\nTitle: ${displayTitle(p)}\n\n[STYLE PROMPT]:\n${getStyle(p)}\n\n[LYRICS]:\n${getLyrics(p)}`;
+      copyText(pkg, "Style and lyrics copied to clipboard.");
+    }
+
+    /* ========================================================================= */
+    /* 8. CHARACTERS & VAULT                                                     */
+    /* ========================================================================= */
+    function fillSelect(select, options, value) {
+      if (!select) return;
+      select.innerHTML = options.map(([v, label]) => `<option value="${esc(v)}">${esc(label)}</option>`).join("");
+      if (value != null) select.value = value;
+    }
+
+    function renderPersonSelect() {
+      const select = $("intake-person-select");
+      fillSelect(select, appState.people.map(p => [p.id, p.role ? `${p.name} (${p.role})` : p.name]), appState.activePersonId);
+    }
+
+    function archetypeOptions(current) {
+      const list = uniq(appState.lexicon.archetypes.concat(current ? [current] : []));
+      return [["", "Choose an archetype…"]].concat(list.map(a => [a, a]));
+    }
+
+    function renderPersonCard() {
+      const p = getActivePerson();
+      if (!p) return;
+      $("person-card-name").textContent = p.name;
+      const role = $("person-card-role");
+      role.textContent = p.role || p.archetype || "No role yet";
+      $("person-card-loc").textContent = p.location || "Place not set";
+      $("person-card-summary").textContent = p.summary || "No summary yet. Use Edit to add one.";
+      $("person-card-score").textContent = `${computeLegacyScore(p)}/100`;
+      $("person-card-links").textContent = appState.links.filter(l => l.from === p.id || l.to === p.id).length;
+      fillSelect($("intake-archetype-select"), archetypeOptions(p.archetype), p.archetype);
+      const voiceSel = $("intake-voice-select");
+      if (voiceSel.options.length !== VOICES.length) fillSelect(voiceSel, VOICES);
+      voiceSel.value = p.voice;
+    }
+
+    function renderIntake() {
+      const p = getActivePerson();
+      if (!p) return;
+      renderPersonSelect();
+      renderPersonCard();
+      const memory = $("raw-memory-input");
+      if (memory && memory.value !== p.rawMemory && document.activeElement !== memory) memory.value = p.rawMemory;
+      updateWordCount();
+      renderLexiconTags();
+      renderArcDisplay();
+    }
+
+    function updateWordCount() {
+      const input = $("raw-memory-input");
+      const badge = $("word-count-badge");
+      if (input && badge) {
+        const n = wordCount(input.value);
+        badge.textContent = `${n} word${n === 1 ? "" : "s"}`;
+      }
+    }
+
+    function selectPerson(id) {
+      if (!appState.people.some(p => p.id === id)) return;
+      stopAudioPlayback();
+      appState.activePersonId = id;
+      scheduleSave();
+      syncTempoToGenre();
+      renderAll();
+    }
+
+    function onArchetypeChanged(val) {
+      const p = getActivePerson();
+      if (!p) return;
+      p.archetype = val;
+      touch(p);
+      renderPersonCard();
+    }
+
+    function onVoiceChanged(val) {
+      const p = getActivePerson();
+      if (!p) return;
+      p.voice = val;
+      touch(p);
+    }
+
+    function saveActiveToVault() {
+      const p = getActivePerson();
+      if (!p) return;
+      const memory = $("raw-memory-input");
+      if (memory) p.rawMemory = memory.value;
+      p.updatedAt = new Date().toISOString();
+      saveState();
+      renderPersonCard();
+      showToast(`${p.name} saved to the vault • Legacy Score ${computeLegacyScore(p)}/100`);
+    }
+
+    function deleteActivePerson() {
+      const p = getActivePerson();
+      if (!p) return;
+      if (!confirm(`Delete ${p.name} and their memory, song, and connections? This can't be undone.`)) return;
+      stopAudioPlayback();
+      appState.people = appState.people.filter(x => x.id !== p.id);
+      appState.links = appState.links.filter(l => l.from !== p.id && l.to !== p.id);
+      appState.activePersonId = appState.people[0] ? appState.people[0].id : null;
+      saveState();
+      renderAll();
+      showToast(`${p.name} was deleted.`);
+    }
+
+    function openPersonModal(id) {
+      const p = id ? appState.people.find(x => x.id === id) : null;
+      $("person-modal-title").textContent = p ? `Edit ${p.name}` : "New Character";
+      $("person-submit-btn").textContent = p ? "Save Changes" : "Create Character";
+      $("person-edit-id").value = p ? p.id : "";
+      $("person-name").value = p ? p.name : "";
+      $("person-nickname").value = p ? p.nickname : "";
+      $("person-location").value = p ? p.location : "";
+      $("person-role").value = p ? p.role : "";
+      $("person-summary").value = p ? p.summary : "";
+      $("person-song-title").value = p ? p.songTitle : "";
+      $("person-symbols").value = p ? p.symbols.join(", ") : "";
+      fillSelect($("person-archetype"), archetypeOptions(p && p.archetype), p ? p.archetype : "");
+      fillSelect($("person-voice"), VOICES, p ? p.voice : "The Family");
+      $("role-datalist").innerHTML = appState.lexicon.roles.map(r => `<option value="${esc(r)}"></option>`).join("");
+      openModal("person-modal", "person-name");
+    }
+
+    function handlePersonSubmit(e) {
+      e.preventDefault();
+      const name = $("person-name").value.trim();
+      if (!name) return;
+      const editId = $("person-edit-id").value;
+      const symbols = uniq($("person-symbols").value.split(",").map(s => s.trim()).filter(Boolean));
+      const fields = {
+        name,
+        nickname: $("person-nickname").value.trim(),
+        location: $("person-location").value.trim(),
+        role: $("person-role").value.trim(),
+        summary: $("person-summary").value.trim(),
+        archetype: $("person-archetype").value,
+        voice: $("person-voice").value || "The Family",
+        songTitle: $("person-song-title").value.trim(),
+        symbols
+      };
+      if (fields.role && !appState.lexicon.roles.includes(fields.role)) appState.lexicon.roles.push(fields.role);
+
+      let p;
+      if (editId) {
+        p = appState.people.find(x => x.id === editId);
+        if (!p) return;
+        Object.assign(p, fields);
+        p.updatedAt = new Date().toISOString();
+        showToast(`${p.name} updated.`);
+      } else {
+        p = normalizePerson(fields);
+        appState.people.push(p);
+        showToast(`${p.name} created. Now write down a memory.`);
+      }
+      appState.activePersonId = p.id;
+      saveState();
+      closeModal("person-modal");
+      syncTempoToGenre();
+      renderAll();
+      if (!editId) {
+        switchMainTab("intake");
+        setTimeout(() => $("raw-memory-input")?.focus(), 80);
+      }
+    }
+
+    function renderVaultGrid() {
+      const grid = $("vault-people-grid");
+      if (!grid) return;
+      const filterSel = $("vault-role-filter");
+      const prevFilter = filterSel ? filterSel.value : "ALL";
+      fillSelect(filterSel, [["ALL", "All Archetypes"]].concat(uniq(appState.lexicon.archetypes.concat(appState.people.map(p => p.archetype))).filter(Boolean).map(a => [a, a])), prevFilter || "ALL");
+      if (filterSel && !filterSel.value) filterSel.value = "ALL";
+
+      const q = ($("vault-search-input")?.value || "").toLowerCase().trim();
+      const roleFilter = filterSel ? filterSel.value : "ALL";
+      const filtered = appState.people.filter(p => {
+        const hay = [p.name, p.nickname, p.location, p.role, p.summary, p.rawMemory].concat(p.symbols).join(" ").toLowerCase();
+        return (!q || hay.includes(q)) && (roleFilter === "ALL" || p.archetype === roleFilter);
+      });
+
+      if (appState.people.length && !filtered.length) {
+        grid.innerHTML = `<p style="color:var(--on-surface-variant);">No characters match that search.</p>`;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(p => `
+        <div class="figure-card" style="display:flex; flex-direction:column; justify-content:space-between; gap:var(--space-sm);">
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:0.5rem;">
+              <h4 style="font-family:var(--font-headline); font-size:1.25rem; margin:0; color:var(--primary); font-weight:700; overflow-wrap:anywhere;">${esc(p.name)}</h4>
+              ${p.archetype ? `<span class="stamp-tag">${esc(p.archetype)}</span>` : ""}
+            </div>
+            ${p.location ? `<div style="font-family:var(--font-label); font-size:0.75rem; color:var(--tertiary); margin:0.25rem 0;">${esc(p.location)}</div>` : ""}
+            <p style="font-size:0.875rem; color:var(--on-surface); margin:0.5rem 0;">${esc(p.summary || (p.rawMemory ? p.rawMemory.slice(0, 180) + (p.rawMemory.length > 180 ? "…" : "") : "No story written yet."))}</p>
+            <div style="margin-top:0.5rem; display:flex; flex-wrap:wrap; gap:0.25rem;">
+              ${p.symbols.map(s => `<span class="stamp-tag" style="font-size:0.7rem; padding:0.1rem 0.35rem;">${esc(s)}</span>`).join("")}
+            </div>
+          </div>
+          <div style="border-top:var(--hairline); padding-top:var(--space-sm); margin-top:var(--space-sm); display:flex; justify-content:space-between; align-items:center; gap:0.5rem;">
+            <div>
+              <span style="font-family:var(--font-label); font-size:0.75rem; color:var(--on-surface-variant);">Legacy Score:</span>
+              <strong style="color:var(--primary); margin-left:0.25rem;">${computeLegacyScore(p)}/100</strong>
+            </div>
+            <button class="btn btn-outline btn-sm" data-action="open-person" data-id="${esc(p.id)}">Open Record</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function openPersonRecord(id) {
+      selectPerson(id);
+      switchMainTab("intake");
+    }
+
+    function exportVaultJSON() {
+      if (saveTimer) saveState();
+      const data = Object.assign({ exportedAt: new Date().toISOString(), app: "The Mythical Creator" }, appState);
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `mythical-creator-vault-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      showToast("Backup downloaded. Keep it somewhere safe.");
+    }
+
+    function triggerImport() {
+      const input = $("import-file-input");
+      if (input) { input.value = ""; input.click(); }
+    }
+
+    function handleImportFile(file) {
+      if (!file) return;
+      if (file.size > 20 * 1024 * 1024) { showToast("That file is too large to be a vault backup."); return; }
+      const reader = new FileReader();
+      reader.onload = () => {
+        let data;
+        try { data = JSON.parse(reader.result); } catch (e) { showToast("That file isn't a valid backup."); return; }
+        if (!data || !Array.isArray(data.people)) { showToast("That file isn't a Mythical Creator backup."); return; }
+        if (appState.people.length && !confirm(`Replace the ${appState.people.length} character(s) on this device with the ${data.people.length} in this backup?`)) return;
+        stopAudioPlayback();
+        appState = mergeState(data);
+        saveState();
+        syncTempoToGenre();
+        renderAll();
+        showToast(`Imported ${appState.people.length} character${appState.people.length === 1 ? "" : "s"}.`);
+      };
+      reader.onerror = () => showToast("Couldn't read that file.");
+      reader.readAsText(file);
+    }
+
+    function eraseAllData() {
+      if (!confirm("Erase every character, story, song, and setting stored in this browser? Export a backup first if you want to keep them. This can't be undone.")) return;
+      stopAudioPlayback();
+      try { window.localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
+      appState = freshState();
+      clearAPIKeys();
+      renderAll();
+      switchMainTab("intake");
+      showToast("All data on this device was erased.");
+    }
+
+    /* ========================================================================= */
+    /* 9. RELATIONSHIP GRAPH (Level 9)                                           */
+    /* ========================================================================= */
+    function initials(name) {
+      return String(name).replace(/<[^>]*>/g, " ").split(/\s+/).map(w => w.replace(/[^\p{L}\p{N}]/gu, "")).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join("") || "?";
+    }
+
+    function truncate(s, n) {
+      s = String(s || "");
+      return s.length > n ? s.slice(0, n - 1) + "…" : s;
+    }
+
+    function renderRelationalGraph() {
+      const svg = $("relational-graph-svg");
+      if (!svg) return;
+      const people = appState.people;
+      const cx = 500, cy = 240;
+      const rx = people.length > 1 ? 360 : 0;
+      const ry = people.length > 1 ? 170 : 0;
+      const nodes = people.map((p, i) => {
+        const angle = -Math.PI / 2 + (2 * Math.PI * i) / Math.max(people.length, 1);
+        return { id: p.id, name: p.name, role: p.role || p.archetype || "", x: cx + rx * Math.cos(angle), y: cy + ry * Math.sin(angle) };
+      });
+
+      let html = `<defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="28" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#b08d57" />
+        </marker>
+      </defs>`;
+
+      appState.links.forEach(l => {
+        const s = nodes.find(n => n.id === l.from);
+        const t = nodes.find(n => n.id === l.to);
+        if (!s || !t) return;
+        html += `<line x1="${s.x}" y1="${s.y}" x2="${t.x}" y2="${t.y}" stroke="#d9cfb8" stroke-width="2" marker-end="url(#arrow)" />`;
+        html += `<text x="${(s.x + t.x) / 2}" y="${(s.y + t.y) / 2 - 8}" font-family="'JetBrains Mono', monospace" font-size="10" fill="#8a6a35" text-anchor="middle">${esc(truncate(l.label, 40))}</text>`;
+      });
+
+      nodes.forEach(n => {
+        const isCurrent = n.id === appState.activePersonId;
+        html += `
+          <g style="cursor:pointer;" data-action="graph-select" data-id="${esc(n.id)}" tabindex="0" role="button" aria-label="${esc(n.name)}">
+            <circle cx="${n.x}" cy="${n.y}" r="${isCurrent ? 28 : 22}" fill="${isCurrent ? "#14213d" : "#fffdf8"}" stroke="${isCurrent ? "#b08d57" : "#14213d"}" stroke-width="${isCurrent ? 3 : 2}" />
+            <text x="${n.x}" y="${n.y + 4}" font-family="'Libre Caslon Text', serif" font-size="12" font-weight="700" fill="${isCurrent ? "#f7f4ec" : "#14213d"}" text-anchor="middle">${esc(initials(n.name))}</text>
+            <text x="${n.x}" y="${n.y + 42}" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="#1c1f26" text-anchor="middle">${esc(truncate(n.name, 28))}</text>
+            <text x="${n.x}" y="${n.y + 55}" font-family="'JetBrains Mono', monospace" font-size="9" fill="#8a6a35" text-anchor="middle">${esc(truncate(n.role, 32))}</text>
+          </g>`;
+      });
+
+      svg.innerHTML = html;
+
+      const list = $("graph-links-list");
+      if (list) {
+        const nameOf = id => (appState.people.find(p => p.id === id) || {}).name || "Unknown";
+        list.innerHTML = appState.links.length
+          ? appState.links.map(l => `
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem; padding:0.5rem 0.75rem; background:var(--surface-container-low); border-radius:var(--rounded); flex-wrap:wrap;">
+              <span style="font-size:0.875rem;"><strong>${esc(nameOf(l.from))}</strong> → <strong>${esc(nameOf(l.to))}</strong> <span style="color:var(--on-surface-variant);">• ${esc(l.label)}</span></span>
+              <button class="btn btn-outline btn-sm" data-action="remove-link" data-id="${esc(l.id)}">Remove</button>
+            </div>`).join("")
+          : `<p style="font-size:0.875rem; color:var(--on-surface-variant); margin:0;">${appState.people.length < 2 ? "Add a second character to start connecting people." : "No connections yet. Use \"+ Add Connection\" to link two characters."}</p>`;
+      }
+    }
+
+    function selectPersonFromGraph(id) {
+      const p = appState.people.find(x => x.id === id);
+      if (!p) return;
+      appState.activePersonId = id;
+      scheduleSave();
+      syncTempoToGenre();
+      renderRelationalGraph();
+      const details = $("graph-node-details");
+      if (details) {
+        details.innerHTML = `<strong>${esc(p.name)}</strong><br><span style="color:var(--on-surface-variant);">${esc(p.role || p.archetype || "")} • Legacy Score ${computeLegacyScore(p)}/100</span>${p.summary ? `<br><em>${esc(p.summary)}</em>` : ""}<div style="margin-top:0.5rem;"><button class="btn btn-outline btn-sm" data-action="open-person" data-id="${esc(p.id)}">Open Record</button></div>`;
+      }
+    }
+
+    function centerGraphView() { renderRelationalGraph(); }
+
+    function openLinkModal() {
+      if (appState.people.length < 2) {
+        showToast("Add at least two characters to connect them.");
+        return;
+      }
+      const opts = appState.people.map(p => [p.id, p.name]);
+      fillSelect($("link-from"), opts, appState.activePersonId);
+      const other = appState.people.find(p => p.id !== appState.activePersonId);
+      fillSelect($("link-to"), opts, other ? other.id : null);
+      $("link-label").value = "";
+      openModal("link-modal", "link-label");
+    }
+
+    function handleLinkSubmit(e) {
+      e.preventDefault();
+      const from = $("link-from").value;
+      const to = $("link-to").value;
+      const label = $("link-label").value.trim();
+      if (!from || !to || !label) return;
+      if (from === to) { showToast("Pick two different people."); return; }
+      appState.links.push({ id: uid("link"), from, to, label });
+      saveState();
+      closeModal("link-modal");
+      renderRelationalGraph();
+      renderPersonCard();
+      showToast("Connection added.");
+    }
+
+    function removeLink(id) {
+      appState.links = appState.links.filter(l => l.id !== id);
+      saveState();
+      renderRelationalGraph();
+      renderPersonCard();
+    }
+
+    /* ========================================================================= */
+    /* 10. BOOK PUBLISHING ENGINE (Level 12)                                     */
+    /* ========================================================================= */
+    function chorusExcerpt(p) {
+      const lines = getLyrics(p).split("\n");
+      const start = lines.findIndex(l => /^\[chorus/i.test(l.trim()));
+      const pick = (start > -1 ? lines.slice(start + 1) : lines).map(l => l.trim()).filter(l => l && !l.startsWith("[") && !l.startsWith("("));
+      return pick.slice(0, 2).join(" / ");
+    }
+
+    function compileBookEngine(announce) {
+      const b = appState.book;
+      ["title", "subtitle", "author", "preface"].forEach(k => {
+        const input = document.querySelector(`[data-book-field="${k}"]`);
+        if (input && document.activeElement !== input) input.value = b[k];
+      });
+
+      $("book-title-display").textContent = (b.title || "Nobody Gets Forgotten").toUpperCase();
+      const sub = $("book-subtitle-display");
+      sub.textContent = b.subtitle;
+      sub.style.display = b.subtitle ? "" : "none";
+      $("book-byline-display").textContent = b.author ? `Compiled by ${b.author} • Made with The Mythical Creator` : "Made with The Mythical Creator";
+
+      const prefaceSection = $("book-preface-section");
+      prefaceSection.style.display = b.preface.trim() ? "" : "none";
+      $("book-preface-display").innerHTML = b.preface.trim().split(/\n\s*\n/).map(par => `<p>${esc(par).replace(/\n/g, "<br>")}</p>`).join("");
+
+      const people = appState.people;
+      const emptyMsg = `<p style="color:var(--on-surface-variant); font-style:italic;">Add characters to the vault and they'll appear here.</p>`;
+
+      $("book-people-list").innerHTML = people.length ? people.map(p => `
+        <div style="background:var(--surface-container-low); border-left:3px solid var(--outline); padding:var(--space-md); border-radius:var(--rounded); break-inside:avoid;">
+          <div style="display:flex; justify-content:space-between; align-items:baseline; gap:0.5rem; flex-wrap:wrap;">
+            <h4 style="font-family:var(--font-headline); font-size:1.25rem; margin:0; color:var(--primary); font-weight:700;">${esc(p.name)}${p.nickname ? ` <span style="font-weight:400; font-style:italic;">"${esc(p.nickname)}"</span>` : ""}</h4>
+            ${p.role || p.archetype ? `<span class="stamp-tag">${esc(p.role || p.archetype)}</span>` : ""}
+          </div>
+          ${p.location ? `<div style="font-family:var(--font-label); font-size:0.75rem; color:var(--tertiary); margin:0.25rem 0;">${esc(p.location)}</div>` : ""}
+          ${p.summary ? `<p style="font-size:0.9375rem; color:var(--on-surface); margin:0.5rem 0;">${esc(p.summary)}</p>` : ""}
+          ${p.rawMemory ? `<div style="font-size:0.875rem; color:var(--on-surface-variant);"><strong>The Memory:</strong> ${esc(p.rawMemory).replace(/\n/g, "<br>")}</div>` : ""}
+          ${p.prose ? `<div style="font-size:0.9375rem; margin-top:0.75rem; white-space:pre-wrap; font-family:var(--font-headline);">${esc(p.prose.replace(/^#\s*/, ""))}</div>` : ""}
+          ${(p.wounds.length || p.gifts.length) ? `<div style="margin-top:0.5rem; display:flex; gap:0.5rem; flex-wrap:wrap; font-family:var(--font-label); font-size:0.75rem;">
+            ${p.wounds.length ? `<span>Wounds: <strong>${esc(p.wounds.join(", "))}</strong></span>` : ""}
+            ${p.gifts.length ? `<span>Gifts: <strong>${esc(p.gifts.join(", "))}</strong></span>` : ""}
+          </div>` : ""}
+        </div>`).join("") : emptyMsg;
+
+      const symbolMap = new Map();
+      people.forEach(p => p.symbols.forEach(s => {
+        const key = s.toLowerCase();
+        if (!symbolMap.has(key)) symbolMap.set(key, { name: s, people: [] });
+        symbolMap.get(key).people.push(p.nickname || p.name);
+      }));
+      const symbols = Array.from(symbolMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+      $("book-symbols-list").innerHTML = symbols.length ? symbols.map(s => `
+        <div style="background:var(--surface-container-low); border:1px solid var(--outline-variant); padding:var(--space-sm) var(--space-md); border-radius:var(--rounded); break-inside:avoid;">
+          <strong style="color:var(--primary); font-family:var(--font-headline);">${esc(s.name)}</strong>
+          <p style="font-size:0.8125rem; color:var(--on-surface-variant); margin:0.25rem 0 0;">Appears in the story of ${esc(s.people.join(", "))}.</p>
+        </div>`).join("") : `<p style="color:var(--on-surface-variant); font-style:italic;">Symbols you tag on your characters will be collected here.</p>`;
+
+      $("book-songs-list").innerHTML = people.length ? people.map(p => `
+        <div style="margin-bottom:var(--space-md); padding:var(--space-md); background:var(--surface-container-low); border-left:2px solid var(--secondary); break-inside:avoid;">
+          <strong style="font-family:var(--font-headline); font-size:1.15rem; color:var(--primary);">${esc(displayTitle(p))}</strong>
+          <div style="font-family:var(--font-label); font-size:0.75rem; color:var(--tertiary);">For ${esc(p.name)} • ${esc(GENRE_LABELS[p.genre] || "")} • Arc: ${esc((p.arc.length ? p.arc : ["Loss", "Rise"]).join(" → "))}${p.album ? ` • ${esc(p.album)}` : ""}</div>
+          <p style="font-size:0.875rem; font-style:italic; margin:0.5rem 0 0; color:var(--on-surface-variant);">"${esc(chorusExcerpt(p))}"</p>
+        </div>`).join("") : emptyMsg;
+
+      if (announce) showToast(people.length ? `Book compiled with ${people.length} character${people.length === 1 ? "" : "s"}.` : "Add characters first; the book is built from your vault.");
+    }
+
+    /* ========================================================================= */
+    /* 11. AI ENGINE (CLAUDE): FREE SAMPLES, OWN KEY, OFFLINE FALLBACK          */
+    /* ========================================================================= */
+    const KEY_STORAGE = "mythicalCreator.anthropicKey";
+    let aiBusy = false;
+    let freeRemaining = null;
+    let aiServerAvailable = null;
+
+    function loadStoredKey() {
+      try {
+        const k = window.localStorage.getItem(KEY_STORAGE) || window.sessionStorage.getItem(KEY_STORAGE) || "";
+        apiKey = k;
+        const remembered = !!window.localStorage.getItem(KEY_STORAGE);
+        const box = $("api-remember-key");
+        if (box) box.checked = remembered;
+        const input = $("api-claude-key");
+        if (input && k) input.value = k;
+      } catch (e) { /* storage blocked */ }
+    }
+
+    function saveAPIKeys() {
+      const key = $("api-claude-key").value.trim();
+      const remember = $("api-remember-key").checked;
+      if (key && !/^sk-ant-/.test(key)) {
+        showToast("That doesn't look like an Anthropic key. Keys start with sk-ant-.");
+        return;
+      }
+      apiKey = key;
+      try {
+        window.localStorage.removeItem(KEY_STORAGE);
+        window.sessionStorage.removeItem(KEY_STORAGE);
+        if (key) (remember ? window.localStorage : window.sessionStorage).setItem(KEY_STORAGE, key);
+      } catch (e) { /* storage blocked: key stays in memory for this tab */ }
+      renderModelMode();
+      showToast(key ? (remember ? "Key saved on this device." : "Key will be used until you close this tab.") : "No key entered.");
+    }
+
+    function clearAPIKeys() {
+      apiKey = "";
+      try {
+        window.localStorage.removeItem(KEY_STORAGE);
+        window.sessionStorage.removeItem(KEY_STORAGE);
+      } catch (e) { /* ignore */ }
+      const input = $("api-claude-key");
+      if (input) input.value = "";
+      renderModelMode();
+      showToast("Key removed from this device.");
+    }
+
+    function aiEnabled() {
+      return appState.settings.modelMode === "claude";
+    }
+
+    function renderModelMode() {
+      const mode = appState.settings.modelMode;
+      const sel = $("model-engine-mode");
+      if (sel) sel.value = mode;
+      const badge = $("byok-mode-badge");
+      const status = $("ai-access-status");
+      let label;
+      if (mode === "offline") {
+        label = "Offline Engine";
+        if (status) status.textContent = "Offline mode: lyrics, style prompts and tags come from the built-in formulas. Nothing leaves this device.";
+      } else if (apiKey) {
+        label = "Claude • Your Key";
+        if (status) status.textContent = "Claude is on, using your own key. Usage is billed to your Anthropic account.";
+      } else if (aiServerAvailable === false) {
+        label = "Claude • Needs a Key";
+        if (status) status.textContent = "Free samples aren't available here. Add your own Anthropic key to use Claude, or switch to offline mode.";
+      } else {
+        label = "Claude • Free Samples";
+        if (status) status.textContent = freeRemaining === null
+          ? "Claude is on with free sample generations. Add your own key any time for unlimited use."
+          : `Claude is on. ${freeRemaining} free sample generation${freeRemaining === 1 ? "" : "s"} left today. Add your own key for unlimited use.`;
+      }
+      if (badge) badge.textContent = mode === "offline" ? "Offline Mode Active" : "Claude AI Active";
+      $("engine-status-text").textContent = `Engine Ready • ${label}`;
+      $("param-density-slider").value = appState.settings.density;
+      $("param-density-val").textContent = `${appState.settings.density} / 5`;
+      document.querySelectorAll("[data-ai-only]").forEach(el => { el.style.display = mode === "claude" ? "" : "none"; });
+    }
+
+    function onModelModeChange(val) {
+      appState.settings.modelMode = val === "offline" ? "offline" : "claude";
+      scheduleSave();
+      renderModelMode();
+    }
+
+    function updateParamLabels() {
+      appState.settings.density = parseInt($("param-density-slider").value, 10);
+      $("param-density-val").textContent = `${appState.settings.density} / 5`;
+      scheduleSave();
+    }
+
+    function characterPayload(p) {
+      return {
+        name: p.name, nickname: p.nickname, location: p.location, role: p.role, archetype: p.archetype,
+        voice: p.voice, summary: p.summary, rawMemory: p.rawMemory.slice(0, 12000),
+        wounds: p.wounds.slice(0, 40), gifts: p.gifts.slice(0, 40), symbols: p.symbols.slice(0, 40),
+        arc: p.arc, genre: p.genre, songTitle: p.songTitle, lyrics: (p.lyrics || "").slice(0, 8000)
+      };
+    }
+
+    function setAiBusy(busy, label) {
+      aiBusy = busy;
+      document.querySelectorAll("[data-ai-button]").forEach(btn => {
+        btn.disabled = busy;
+        btn.style.opacity = busy ? "0.6" : "";
+      });
+      const status = $("engine-status-text");
+      if (busy && status) status.textContent = label || "Claude is writing…";
+      if (!busy) renderModelMode();
+    }
+
+    async function aiRequest(task, onText) {
+      const p = getActivePerson();
+      if (!p) throw new Error("no-person");
+      const headers = { "content-type": "application/json" };
+      if (apiKey) headers["x-user-api-key"] = apiKey;
+      let res;
+      try {
+        res = await fetch("/api/generate", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            task,
+            character: characterPayload(p),
+            options: {
+              density: appState.settings.density,
+              genreLabel: GENRE_LABELS[p.genre] || "",
+              wounds: appState.lexicon.wounds,
+              gifts: appState.lexicon.gifts
+            }
+          })
+        });
+      } catch (e) {
+        aiServerAvailable = false;
+        throw new Error("AI isn't reachable from here (are you offline, or opening the file directly?). Using the offline engine instead.");
+      }
+      const remaining = res.headers.get("x-free-remaining");
+      if (remaining !== null) freeRemaining = Number(remaining);
+      if (!res.ok) {
+        let data = {};
+        try { data = await res.json(); } catch (e) { /* not json */ }
+        if (data.code === "no_server_key") aiServerAvailable = false;
+        if (data.code === "free_limit") freeRemaining = 0;
+        const err = new Error(data.error || "AI generation failed.");
+        err.code = data.code;
+        throw err;
+      }
+      aiServerAvailable = true;
+      if (task === "extract") return res.json();
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let full = "";
+      for (;;) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        full += decoder.decode(value, { stream: true });
+        onText && onText(full);
+      }
+      full += decoder.decode();
+      onText && onText(full);
+      return full;
+    }
+
+    function handleAiError(err) {
+      renderModelMode();
+      if (err && (err.code === "free_limit" || err.code === "no_server_key")) {
+        showToast(err.message, 7000);
+        switchMainTab("byok");
+        setTimeout(() => $("api-claude-key")?.focus(), 100);
+      } else {
+        showToast((err && err.message) || "AI generation failed.", 6000);
+      }
+    }
+
+    function requireAi() {
+      if (aiBusy) { showToast("Claude is still writing. One moment."); return false; }
+      if (!aiEnabled()) {
+        showToast("Claude is off. Turn it on in the AI Settings tab.");
+        return false;
+      }
+      if (!getActivePerson()) return false;
+      return true;
+    }
+
+    async function aiWriteLyrics() {
+      if (!requireAi()) return;
+      const p = getActivePerson();
+      if (p.lyrics && !confirm("Replace the current lyrics with a new version written by Claude?")) return;
+      const el = $("suno-lyrics-output");
+      const before = p.lyrics;
+      setAiBusy(true, "Claude is writing lyrics…");
+      try {
+        const text = await aiRequest("lyrics", t => { el.value = t; });
+        p.lyrics = text.trim();
+        touch(p);
+        renderSuno();
+        renderStats();
+        showToast("Lyrics written. Edit anything you like.");
+      } catch (err) {
+        p.lyrics = before;
+        renderSuno();
+        handleAiError(err);
+      } finally {
+        setAiBusy(false);
+      }
+    }
+
+    async function aiWriteStyle() {
+      if (!requireAi()) return;
+      const p = getActivePerson();
+      const el = $("suno-style-output");
+      const before = p.style;
+      setAiBusy(true, "Claude is writing the style prompt…");
+      try {
+        const text = await aiRequest("style", t => { el.value = t; });
+        p.style = text.trim();
+        touch(p);
+        renderSuno();
+        showToast("Style prompt written.");
+      } catch (err) {
+        p.style = before;
+        renderSuno();
+        handleAiError(err);
+      } finally {
+        setAiBusy(false);
+      }
+    }
+
+    async function aiWriteProse(kind) {
+      if (!requireAi()) return;
+      const p = getActivePerson();
+      if (p.prose && !confirm(`Replace the current piece with a new ${kind === "poem" ? "poem" : "story"}?`)) return;
+      const el = $("prose-output");
+      const before = p.prose;
+      setAiBusy(true, kind === "poem" ? "Claude is writing a poem…" : "Claude is writing a story…");
+      try {
+        const text = await aiRequest(kind, t => { el.value = t; });
+        p.prose = text.trim();
+        touch(p);
+        renderSuno();
+        showToast(kind === "poem" ? "Poem written." : "Story written.");
+      } catch (err) {
+        p.prose = before;
+        renderSuno();
+        handleAiError(err);
+      } finally {
+        setAiBusy(false);
+      }
+    }
+
+    async function aiExtract() {
+      const p = getActivePerson();
+      setAiBusy(true, "Claude is reading the memory…");
+      try {
+        const out = await aiRequest("extract");
+        if (out.wounds.length) p.wounds = uniq(out.wounds);
+        if (out.gifts.length) p.gifts = uniq(out.gifts);
+        p.symbols = uniq(p.symbols.concat(out.symbols || []));
+        out.symbols.forEach(s => { if (!appState.lexicon.symbols.some(x => x.toLowerCase() === s.toLowerCase())) appState.lexicon.symbols.push(s); });
+        if (out.arc && out.arc.length) p.arc = out.arc.filter(a => ARC_VECTORS[a]).slice(0, 4);
+        if (!p.summary && out.summary) p.summary = out.summary;
+        touch(p);
+        renderIntake();
+        renderStats();
+        showToast(`Claude found ${out.wounds.length} wound${out.wounds.length === 1 ? "" : "s"}, ${out.gifts.length} gift${out.gifts.length === 1 ? "" : "s"}, ${out.symbols.length} symbol${out.symbols.length === 1 ? "" : "s"}. Adjust the tags to fit.`, 4500);
+        return true;
+      } catch (err) {
+        if (err && (err.code === "free_limit" || err.code === "no_server_key")) {
+          handleAiError(err);
+          return true;
+        }
+        showToast(`${err.message || "AI tagging failed."} Using the offline extractor.`, 5000);
+        return false;
+      } finally {
+        setAiBusy(false);
+      }
+    }
+
+    /* ========================================================================= */
+    /* 12. RENDERING, NAVIGATION & STARTUP                                       */
+    /* ========================================================================= */
+    function refreshIcons() {
+      if (window.lucide && typeof window.lucide.createIcons === "function") window.lucide.createIcons();
+    }
+
+    function renderStats() {
+      const people = appState.people;
+      $("stat-people-count").textContent = people.length;
+      $("stat-story-count").textContent = people.filter(p => wordCount(p.rawMemory) > 0).length;
+      $("stat-sheet-count").textContent = people.filter(p => p.lyrics || p.songTitle || p.arc.length).length;
+      const p = getActivePerson();
+      const arcEl = $("stat-active-arc");
+      const vecEl = $("stat-vector-values");
+      if (p && p.arc.length) {
+        arcEl.textContent = p.arc.join(" → ");
+        const avg = i => p.arc.reduce((s, a) => s + ARC_VECTORS[a][i], 0) / p.arc.length;
+        const f = n => (n >= 0 ? "+" : "") + n.toFixed(1);
+        vecEl.textContent = `Val: ${f(avg(0))} | Aro: ${f(avg(1))}`;
+      } else {
+        arcEl.textContent = "—";
+        vecEl.textContent = p ? "No arc yet" : "Add a character";
+      }
+    }
+
+    function updateEmptyStates() {
+      const has = appState.people.length > 0;
+      document.querySelectorAll("[data-empty]").forEach(el => { el.style.display = has ? "none" : ""; });
+      document.querySelectorAll("[data-needs-person]").forEach(el => { el.style.display = has ? "" : "none"; });
+    }
+
+    function renderCurrentTab() {
+      if (!appState.people.length && currentTab !== "book" && currentTab !== "byok") return;
+      if (currentTab === "intake") renderIntake();
+      else if (currentTab === "sheet") renderEngravedLeadSheet();
+      else if (currentTab === "suno") renderSuno();
+      else if (currentTab === "vault") renderVaultGrid();
+      else if (currentTab === "graph") renderRelationalGraph();
+      else if (currentTab === "book") compileBookEngine();
+      else if (currentTab === "byok") renderModelMode();
+    }
+
+    function renderAll() {
+      updateEmptyStates();
+      renderStats();
+      if (appState.people.length) renderIntake();
+      renderCurrentTab();
+      renderModelMode();
+      refreshIcons();
+    }
+
+    function switchMainTab(tabId) {
+      if (tabId !== "sheet") stopAudioPlayback();
+      currentTab = tabId;
+      document.querySelectorAll(".app-view").forEach(v => { v.style.display = "none"; });
+      document.querySelectorAll(".nav-tab").forEach(t => {
+        t.classList.remove("active");
+        t.setAttribute("aria-selected", "false");
+      });
+      const view = $(`view-${tabId}`);
+      const tab = $(`tab-${tabId}`);
+      if (view) view.style.display = "block";
+      if (tab) {
+        tab.classList.add("active");
+        tab.setAttribute("aria-selected", "true");
+      }
+      renderCurrentTab();
+      refreshIcons();
+    }
+
+    function bindEvents() {
+      document.addEventListener("click", e => {
+        const el = e.target.closest("[data-action]");
+        if (!el) return;
+        const action = el.getAttribute("data-action");
+        if (action === "toggle-tag") toggleTag(el.dataset.kind, el.dataset.value);
+        else if (action === "open-person") openPersonRecord(el.dataset.id);
+        else if (action === "graph-select") selectPersonFromGraph(el.dataset.id);
+        else if (action === "remove-link") removeLink(el.dataset.id);
+      });
+
+      document.addEventListener("keydown", e => {
+        if (e.key === "Escape") document.querySelectorAll(".modal-overlay.open").forEach(m => m.classList.remove("open"));
+        if ((e.key === "Enter" || e.key === " ") && e.target.matches && e.target.matches(".arc-chip, [data-action='graph-select']")) {
+          e.preventDefault();
+          e.target.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+        }
+      });
+
+      document.querySelectorAll(".modal-overlay").forEach(m => {
+        m.addEventListener("click", e => { if (e.target === m) m.classList.remove("open"); });
+      });
+
+      $("raw-memory-input").addEventListener("input", e => {
+        const p = getActivePerson();
+        if (!p) return;
+        p.rawMemory = e.target.value;
+        updateWordCount();
+        touch(p);
+        $("person-card-score").textContent = `${computeLegacyScore(p)}/100`;
+        renderStats();
+      });
+
+      $("suno-lyrics-output").addEventListener("input", e => {
+        const p = getActivePerson();
+        if (!p) return;
+        p.lyrics = e.target.value;
+        touch(p);
+        $("lyrics-edited-badge").style.display = "";
+        renderStats();
+      });
+
+      $("suno-style-output").addEventListener("input", e => {
+        const p = getActivePerson();
+        if (!p) return;
+        p.style = e.target.value;
+        touch(p);
+        $("style-edited-badge").style.display = "";
+      });
+
+      $("suno-song-title-input").addEventListener("input", e => {
+        const p = getActivePerson();
+        if (!p) return;
+        p.songTitle = e.target.value.trim();
+        touch(p);
+        renderStats();
+      });
+
+      $("prose-output").addEventListener("input", e => {
+        const p = getActivePerson();
+        if (!p) return;
+        p.prose = e.target.value;
+        touch(p);
+      });
+
+      $("suno-album-input").addEventListener("input", e => {
+        const p = getActivePerson();
+        if (!p) return;
+        p.album = e.target.value.trim();
+        touch(p);
+      });
+
+      document.querySelectorAll("[data-book-field]").forEach(input => {
+        input.addEventListener("input", () => {
+          appState.book[input.getAttribute("data-book-field")] = input.value;
+          scheduleSave();
+          compileBookEngine();
+        });
+      });
+
+      $("import-file-input").addEventListener("change", e => handleImportFile(e.target.files && e.target.files[0]));
+    }
+
+    function handleCustomCategorySubmit(e) {
+      e.preventDefault();
+      const kind = $("custom-type-select").value;
+      const input = $("custom-name-input");
+      const name = input.value.trim();
+      if (!name || !appState.lexicon[kind]) return;
+      if (!appState.lexicon[kind].some(x => x.toLowerCase() === name.toLowerCase())) appState.lexicon[kind].push(name);
+      const p = getActivePerson();
+      if (p) {
+        if (["wounds", "gifts", "symbols"].includes(kind) && !p[kind].includes(name)) p[kind].push(name);
+        if (kind === "archetypes") p.archetype = name;
+        touch(p);
+      }
+      saveState();
+      input.value = "";
+      closeModal("custom-category-modal");
+      renderAll();
+      const labels = { wounds: "wound", gifts: "gift", symbols: "symbol", archetypes: "archetype", roles: "role" };
+      showToast(`Added "${name}" as a ${labels[kind]}${p && kind !== "roles" ? ` for ${p.name}` : ""}.`);
+    }
+
+    function openCustomCategoryModal() {
+      openModal("custom-category-modal", "custom-name-input");
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      loadState();
+      loadStoredKey();
+      fillSelect($("intake-voice-select"), VOICES);
+      bindEvents();
+      syncTempoToGenre();
+      renderAll();
+      switchMainTab("intake");
+    });
+  </script>
+</body>
+</html>
