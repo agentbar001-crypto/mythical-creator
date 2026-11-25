@@ -6,4 +6,4 @@ export const SITE_DESCRIPTION =
 export const CREATOR = "Billy Adono Robles";
 export const absoluteUrl = (path = "/") => `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;
 export const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "";
-export const LEGAL_UPDATED = "November 11, 2026";
+export const LEGAL_UPDATED = "November 25, 2026";
