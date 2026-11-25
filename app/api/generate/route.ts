@@ -56,9 +56,9 @@ export async function POST(request: Request) {
     if (!serverKey) {
       return json(503, { error: "AI generation isn't set up on this server yet. Add your own key in the AI settings tab.", code: "no_server_key" });
     }
-    const quota = checkAndCount(visitorId(request.headers));
+    const quota = await checkAndCount(visitorId(request.headers));
     if (!quota.allowed) {
-      return json(429, { error: "You've used today's free AI generations. Add your own Anthropic key in the AI settings tab to keep going.", code: "free_limit" });
+      return json(429, { error: "Today's free AI generations are used up. Add your own Anthropic key in the AI settings tab to keep going.", code: "free_limit" });
     }
     remaining = quota.remaining;
   }

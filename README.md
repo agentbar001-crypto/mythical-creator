@@ -35,4 +35,4 @@ npm run dev                  # http://localhost:3000 and http://localhost:3000/s
 
 Built for Vercel: import the repo, set the environment variables from `.env.example`, and deploy. Set `NEXT_PUBLIC_SITE_URL` to the final domain so canonical URLs and the sitemap use full absolute links.
 
-Note: the free-sample counter is in memory per server instance. Move it to a shared store (Vercel KV / Upstash Redis) before relying on it to cap costs.
+Free-sample limits: set `FREE_GENERATIONS_PER_DAY` (per visitor) and `FREE_GENERATIONS_GLOBAL_PER_DAY` (site-wide cap, default 500, protects your API bill). For counts shared across server instances, add **Upstash Redis** from the Vercel Marketplace (Project → Storage), which sets `KV_REST_API_URL` and `KV_REST_API_TOKEN` automatically. Without it the counter falls back to memory per instance. Visitor IPs are hashed with `RATE_LIMIT_SALT` before use.

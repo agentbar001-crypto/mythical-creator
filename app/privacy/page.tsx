@@ -30,7 +30,7 @@ export default function Privacy() {
       <p>If you add your own Anthropic key, it is sent with each AI request so the request runs on your Anthropic account. Our server uses it only for that request and never stores it. In your browser it is kept for the current tab only, unless you tick &quot;Remember my key on this device&quot;, which saves it in local storage on that device.</p>
 
       <h2>Information we do process</h2>
-      <p>To limit free sample generations, our server counts requests per IP address per day, in memory, and discards the count daily. Our hosting provider may keep standard technical logs (such as IP address, time, and page requested) for security and reliability.</p>
+      <p>To limit free sample generations, our server counts requests per day against a one-way hash of your IP address. The raw IP address is not stored, and each day&apos;s counts expire automatically within about 26 hours. Our hosting provider may keep standard technical logs (such as IP address, time, and page requested) for security and reliability.</p>
 
       <h2>Stories about other people</h2>
       <p>You&apos;re responsible for what you write. If you record the story of a living person, please make sure they&apos;re comfortable with it, especially before sharing or publishing.</p>
